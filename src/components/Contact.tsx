@@ -137,7 +137,10 @@ export const Contact = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Project Type
                   </label>
-                  <Select value={formData.project_type} onValueChange={(value) => setFormData({ ...formData, project_type: value })}>
+                  <Select 
+                    value={formData.project_type} 
+                    onValueChange={(value) => setFormData({ ...formData, project_type: value as ProjectCategory | '' })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select project type" />
                     </SelectTrigger>
