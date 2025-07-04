@@ -9,7 +9,204 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      contact_inquiries: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          project_type: Database["public"]["Enums"]["project_category"] | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          project_type?: Database["public"]["Enums"]["project_category"] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          project_type?: Database["public"]["Enums"]["project_category"] | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      portfolio_items: {
+        Row: {
+          aspect_ratio: Database["public"]["Enums"]["aspect_ratio"]
+          caption: string
+          category: Database["public"]["Enums"]["project_category"]
+          created_at: string
+          display_order: number | null
+          id: string
+          image_url: string
+          is_featured: boolean | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          aspect_ratio?: Database["public"]["Enums"]["aspect_ratio"]
+          caption: string
+          category: Database["public"]["Enums"]["project_category"]
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url: string
+          is_featured?: boolean | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          aspect_ratio?: Database["public"]["Enums"]["aspect_ratio"]
+          caption?: string
+          category?: Database["public"]["Enums"]["project_category"]
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          image_url?: string
+          is_featured?: boolean | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pricing_packages: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          features: string[]
+          id: string
+          is_active: boolean | null
+          is_popular: boolean | null
+          name: string
+          price: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          features?: string[]
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name: string
+          price: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          features?: string[]
+          id?: string
+          is_active?: boolean | null
+          is_popular?: boolean | null
+          name?: string
+          price?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+          role: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+          role?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+          role?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          display_order: number | null
+          experience: string
+          id: string
+          image_url: string
+          is_active: boolean | null
+          name: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number | null
+          experience: string
+          id?: string
+          image_url: string
+          is_active?: boolean | null
+          name: string
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          display_order?: number | null
+          experience?: string
+          id?: string
+          image_url?: string
+          is_active?: boolean | null
+          name?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      website_settings: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +215,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      aspect_ratio: "square" | "wide" | "tall"
+      project_category:
+        | "Real Estate"
+        | "Medical"
+        | "Clothing"
+        | "Food"
+        | "Construction"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +336,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      aspect_ratio: ["square", "wide", "tall"],
+      project_category: [
+        "Real Estate",
+        "Medical",
+        "Clothing",
+        "Food",
+        "Construction",
+      ],
+    },
   },
 } as const

@@ -1,0 +1,242 @@
+
+import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MapPin, Phone, Mail } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+
+export const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    project_type: '',
+    message: ''
+  });
+
+  const { toast } = useToast();
+
+  const { data: settings } = useQuery({
+    queryKey: ['website-settings'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('website_settings')
+        .select('*')
+        .eq('key', 'site_config')
+        .single();
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  const siteConfig = settings?.value as any;
+  const contactInfo = siteConfig?.contact;
+
+  const submitInquiry = useMutation({
+    mutationFn: async (data: typeof formData) => {
+      console.log('Submitting inquiry:', data);
+      const { error } = await supabase
+        .from('contact_inquiries')
+        .insert([{
+          name: data.name,
+          email: data.email,
+          project_type: data.project_type || null,
+          message: data.message
+        }]);
+      
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast({
+        title: "Message Sent!",
+        description: "We'll get back to you within 24 hours.",
+      });
+      setFormData({ name: '', email: '', project_type: '', message: '' });
+    },
+    onError: (error) => {
+      console.error('Submission error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+    submitInquiry.mutate(formData);
+  };
+
+  return (
+    <section id="contact" className="py-20 bg-white">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4 text-slate-900">Get In Touch</h2>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Ready to capture your special moments? Let's discuss your project
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          {/* Contact Form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-2xl">Send us a message</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Name *
+                    </label>
+                    <Input
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      placeholder="Your full name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email *
+                    </label>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="your.email@example.com"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Project Type
+                  </label>
+                  <Select value={formData.project_type} onValueChange={(value) => setFormData({ ...formData, project_type: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select project type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Real Estate">Real Estate</SelectItem>
+                      <SelectItem value="Medical">Medical</SelectItem>
+                      <SelectItem value="Clothing">Clothing</SelectItem>
+                      <SelectItem value="Food">Food</SelectItem>
+                      <SelectItem value="Construction">Construction</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Message *
+                  </label>
+                  <Textarea
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    placeholder="Tell us about your project..."
+                    rows={6}
+                    required
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full bg-slate-900 hover:bg-slate-800"
+                  disabled={submitInquiry.isPending}
+                >
+                  {submitInquiry.isPending ? 'Sending...' : 'Send Message'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Contact Information */}
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Contact Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {contactInfo?.phone && (
+                  <div className="flex items-start gap-4">
+                    <Phone className="w-6 h-6 text-purple-600 mt-1" />
+                    <div>
+                      <h3 className="font-medium text-slate-900">Phone</h3>
+                      <p className="text-gray-600">{contactInfo.phone}</p>
+                    </div>
+                  </div>
+                )}
+
+                {contactInfo?.email && (
+                  <div className="flex items-start gap-4">
+                    <Mail className="w-6 h-6 text-purple-600 mt-1" />
+                    <div>
+                      <h3 className="font-medium text-slate-900">Email</h3>
+                      <p className="text-gray-600">{contactInfo.email}</p>
+                    </div>
+                  </div>
+                )}
+
+                {contactInfo?.address && (
+                  <div className="flex items-start gap-4">
+                    <MapPin className="w-6 h-6 text-purple-600 mt-1" />
+                    <div>
+                      <h3 className="font-medium text-slate-900">Address</h3>
+                      <p className="text-gray-600">{contactInfo.address}</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+              <CardContent className="p-6">
+                <h3 className="text-xl font-bold text-slate-900 mb-4">Why Choose Us?</h3>
+                <ul className="space-y-3 text-gray-700">
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    Professional quality guaranteed
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    Quick turnaround times
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    Competitive pricing
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    Experienced team
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
