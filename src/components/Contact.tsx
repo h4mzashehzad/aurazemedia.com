@@ -43,12 +43,12 @@ export const Contact = () => {
       console.log('Submitting inquiry:', data);
       const { error } = await supabase
         .from('contact_inquiries')
-        .insert([{
+        .insert({
           name: data.name,
           email: data.email,
           project_type: data.project_type || null,
           message: data.message
-        }]);
+        });
       
       if (error) {
         console.error('Supabase error:', error);
