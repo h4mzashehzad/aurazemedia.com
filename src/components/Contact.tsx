@@ -10,12 +10,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Phone, Mail } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
+import { Database } from "@/integrations/supabase/types";
+
+type ProjectCategory = Database["public"]["Enums"]["project_category"];
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    project_type: '',
+    project_type: '' as ProjectCategory | '',
     message: ''
   });
 
