@@ -11,14 +11,18 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, Star } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Database } from '@/integrations/supabase/types';
+
+type CategoryType = Database['public']['Enums']['project_category'];
+type AspectRatioType = Database['public']['Enums']['aspect_ratio'];
 
 interface PortfolioItem {
   id: string;
   title: string;
-  category: string;
+  category: CategoryType;
   image_url: string;
   caption: string;
-  aspect_ratio: string;
+  aspect_ratio: AspectRatioType;
   tags: string[];
   is_featured: boolean;
   display_order: number;
@@ -29,10 +33,10 @@ export const PortfolioManager = () => {
   const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Real Estate' as const,
+    category: 'Real Estate' as CategoryType,
     image_url: '',
     caption: '',
-    aspect_ratio: 'square' as const,
+    aspect_ratio: 'square' as AspectRatioType,
     tags: '',
     is_featured: false,
     display_order: 0
@@ -58,10 +62,10 @@ export const PortfolioManager = () => {
     mutationFn: async (data: Omit<PortfolioItem, 'id'>) => {
       const { error } = await supabase
         .from('portfolio_items')
-        .insert([{
+        .insert({
           ...data,
           tags: data.tags.length > 0 ? data.tags : []
-        }]);
+        });
       
       if (error) throw error;
     },
@@ -155,10 +159,10 @@ export const PortfolioManager = () => {
     setEditingItem(item);
     setFormData({
       title: item.title,
-      category: item.category as any,
+      category: item.category,
       image_url: item.image_url,
       caption: item.caption,
-      aspect_ratio: item.aspect_ratio as any,
+      aspect_ratio: item.aspect_ratio,
       tags: item.tags.join(', '),
       is_featured: item.is_featured,
       display_order: item.display_order
@@ -194,7 +198,7 @@ export const PortfolioManager = () => {
                   required
                   className="bg-gray-800 border-gray-600"
                 />
-                <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value as any })}>
+                <Select value={formData.category} onValueChange={(value: CategoryType) => setFormData({ ...formData, category: value })}>
                   <SelectTrigger className="bg-gray-800 border-gray-600">
                     <SelectValue />
                   </SelectTrigger>
@@ -222,7 +226,7 @@ export const PortfolioManager = () => {
                 className="bg-gray-800 border-gray-600"
               />
               <div className="grid grid-cols-3 gap-4">
-                <Select value={formData.aspect_ratio} onValueChange={(value) => setFormData({ ...formData, aspect_ratio: value as any })}>
+                <Select value={formData.aspect_ratio} onValueChange={(value: AspectRatioType) => setFormData({ ...formData, aspect_ratio: value })}>
                   <SelectTrigger className="bg-gray-800 border-gray-600">
                     <SelectValue />
                   </SelectTrigger>

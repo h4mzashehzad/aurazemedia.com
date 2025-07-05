@@ -33,7 +33,13 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
       }
 
       if (data && data.length > 0) {
-        const admin = data[0];
+        const adminData = data[0];
+        // Transform admin_id to id for consistency with the interface
+        const admin = {
+          id: adminData.admin_id,
+          full_name: adminData.full_name,
+          email: adminData.email
+        };
         localStorage.setItem('admin_user', JSON.stringify(admin));
         onLogin(admin);
         toast({

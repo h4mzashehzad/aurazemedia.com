@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -46,19 +46,21 @@ export const SettingsManager = () => {
       
       if (error) throw error;
       return data as WebsiteSettings;
-    },
-    onSuccess: (data) => {
-      if (data?.value) {
-        setFormData({
-          name: data.value.name || '',
-          tagline: data.value.tagline || '',
-          phone: data.value.contact?.phone || '',
-          email: data.value.contact?.email || '',
-          address: data.value.contact?.address || ''
-        });
-      }
     }
   });
+
+  // Update form data when settings are loaded
+  useEffect(() => {
+    if (settings?.value) {
+      setFormData({
+        name: settings.value.name || '',
+        tagline: settings.value.tagline || '',
+        phone: settings.value.contact?.phone || '',
+        email: settings.value.contact?.email || '',
+        address: settings.value.contact?.address || ''
+      });
+    }
+  }, [settings]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
