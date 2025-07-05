@@ -11,7 +11,7 @@ export const Pricing = () => {
     queryKey: ['pricing-packages'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('pricing-packages')
+        .from('pricing_packages')
         .select('*')
         .eq('is_active', true)
         .order('display_order', { ascending: true });
