@@ -26,7 +26,7 @@ export const Hero = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center overflow-hidden pt-16">
       {/* Background pattern */}
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
       
@@ -51,7 +51,7 @@ export const Hero = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
           <Button 
             size="lg" 
-            className="bg-white text-slate-900 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
+            className="bg-white text-gray-900 hover:bg-gray-100 px-8 py-3 text-lg font-semibold"
             onClick={scrollToPortfolio}
           >
             View Our Work
@@ -59,7 +59,7 @@ export const Hero = () => {
           <Button 
             variant="outline" 
             size="lg" 
-            className="border-white text-white hover:bg-white hover:text-slate-900 px-8 py-3 text-lg font-semibold"
+            className="border-white text-white hover:bg-white hover:text-gray-900 px-8 py-3 text-lg font-semibold bg-transparent"
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
           >
             Get In Touch

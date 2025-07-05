@@ -40,12 +40,12 @@ export const Portfolio = () => {
 
   if (isLoading) {
     return (
-      <section id="portfolio" className="py-20 bg-gray-50">
+      <section id="portfolio" className="py-20 bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Our Portfolio</h2>
+            <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
             </div>
           </div>
         </div>
@@ -54,11 +54,11 @@ export const Portfolio = () => {
   }
 
   return (
-    <section id="portfolio" className="py-20 bg-gray-50">
+    <section id="portfolio" className="py-20 bg-gray-900">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-slate-900">Our Portfolio</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Explore our diverse collection of professional photography work across different industries
           </p>
         </div>
@@ -70,24 +70,28 @@ export const Portfolio = () => {
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
               onClick={() => setSelectedCategory(category)}
-              className="px-6 py-2"
+              className={`px-6 py-2 ${
+                selectedCategory === category 
+                  ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                  : "border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
+              }`}
             >
               {category}
             </Button>
           ))}
         </div>
 
-        {/* Portfolio grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[300px]">
+        {/* Portfolio grid - 4 columns on desktop, 2 on mobile */}
+        <div className="columns-2 md:columns-4 gap-6 space-y-6">
           {filteredItems?.map((item) => (
             <div
               key={item.id}
-              className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 ${getGridClass(item.aspect_ratio)}`}
+              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid"
             >
               <img
                 src={item.image_url}
                 alt={item.title}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
               
               {/* Overlay */}
@@ -111,7 +115,7 @@ export const Portfolio = () => {
 
         {filteredItems?.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No items found in this category.</p>
+            <p className="text-gray-400 text-lg">No items found in this category.</p>
           </div>
         )}
       </div>

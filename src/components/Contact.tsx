@@ -89,26 +89,26 @@ export const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-white">
+    <section id="contact" className="py-20 bg-gray-800">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-slate-900">Get In Touch</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4 text-white">Get In Touch</h2>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Ready to capture your special moments? Let's discuss your project
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
           {/* Contact Form */}
-          <Card>
+          <Card className="bg-gray-900 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-2xl">Send us a message</CardTitle>
+              <CardTitle className="text-2xl text-white">Send us a message</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Name *
                     </label>
                     <Input
@@ -117,10 +117,11 @@ export const Contact = () => {
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Your full name"
                       required
+                      className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
                       Email *
                     </label>
                     <Input
@@ -129,33 +130,34 @@ export const Contact = () => {
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="your.email@example.com"
                       required
+                      className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Project Type
                   </label>
                   <Select 
                     value={formData.project_type} 
                     onValueChange={(value) => setFormData({ ...formData, project_type: value as ProjectCategory | '' })}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
                       <SelectValue placeholder="Select project type" />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Real Estate">Real Estate</SelectItem>
-                      <SelectItem value="Medical">Medical</SelectItem>
-                      <SelectItem value="Clothing">Clothing</SelectItem>
-                      <SelectItem value="Food">Food</SelectItem>
-                      <SelectItem value="Construction">Construction</SelectItem>
+                    <SelectContent className="bg-gray-800 border-gray-600">
+                      <SelectItem value="Real Estate" className="text-white hover:bg-gray-700">Real Estate</SelectItem>
+                      <SelectItem value="Medical" className="text-white hover:bg-gray-700">Medical</SelectItem>
+                      <SelectItem value="Clothing" className="text-white hover:bg-gray-700">Clothing</SelectItem>
+                      <SelectItem value="Food" className="text-white hover:bg-gray-700">Food</SelectItem>
+                      <SelectItem value="Construction" className="text-white hover:bg-gray-700">Construction</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
                     Message *
                   </label>
                   <Textarea
@@ -164,12 +166,13 @@ export const Contact = () => {
                     placeholder="Tell us about your project..."
                     rows={6}
                     required
+                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400"
                   />
                 </div>
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-slate-900 hover:bg-slate-800"
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                   disabled={submitInquiry.isPending}
                 >
                   {submitInquiry.isPending ? 'Sending...' : 'Send Message'}
@@ -180,61 +183,61 @@ export const Contact = () => {
 
           {/* Contact Information */}
           <div className="space-y-8">
-            <Card>
+            <Card className="bg-gray-900 border-gray-700">
               <CardHeader>
-                <CardTitle className="text-2xl">Contact Information</CardTitle>
+                <CardTitle className="text-2xl text-white">Contact Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {contactInfo?.phone && (
                   <div className="flex items-start gap-4">
-                    <Phone className="w-6 h-6 text-purple-600 mt-1" />
+                    <Phone className="w-6 h-6 text-purple-400 mt-1" />
                     <div>
-                      <h3 className="font-medium text-slate-900">Phone</h3>
-                      <p className="text-gray-600">{contactInfo.phone}</p>
+                      <h3 className="font-medium text-white">Phone</h3>
+                      <p className="text-gray-400">{contactInfo.phone}</p>
                     </div>
                   </div>
                 )}
 
                 {contactInfo?.email && (
                   <div className="flex items-start gap-4">
-                    <Mail className="w-6 h-6 text-purple-600 mt-1" />
+                    <Mail className="w-6 h-6 text-purple-400 mt-1" />
                     <div>
-                      <h3 className="font-medium text-slate-900">Email</h3>
-                      <p className="text-gray-600">{contactInfo.email}</p>
+                      <h3 className="font-medium text-white">Email</h3>
+                      <p className="text-gray-400">{contactInfo.email}</p>
                     </div>
                   </div>
                 )}
 
                 {contactInfo?.address && (
                   <div className="flex items-start gap-4">
-                    <MapPin className="w-6 h-6 text-purple-600 mt-1" />
+                    <MapPin className="w-6 h-6 text-purple-400 mt-1" />
                     <div>
-                      <h3 className="font-medium text-slate-900">Address</h3>
-                      <p className="text-gray-600">{contactInfo.address}</p>
+                      <h3 className="font-medium text-white">Address</h3>
+                      <p className="text-gray-400">{contactInfo.address}</p>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100">
+            <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 border-purple-600/50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Why Choose Us?</h3>
-                <ul className="space-y-3 text-gray-700">
+                <h3 className="text-xl font-bold text-white mb-4">Why Choose Us?</h3>
+                <ul className="space-y-3 text-gray-300">
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                     Professional quality guaranteed
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                     Quick turnaround times
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                     Competitive pricing
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                     Experienced team
                   </li>
                 </ul>
