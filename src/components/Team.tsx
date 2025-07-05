@@ -19,12 +19,12 @@ export const Team = () => {
 
   if (isLoading) {
     return (
-      <section id="team" className="py-20 bg-white">
+      <section id="team" className="py-20 bg-black">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Meet Our Team</h2>
+            <h2 className="text-4xl font-bold mb-4 text-white">Meet Our Team</h2>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-900"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
             </div>
           </div>
         </div>
@@ -33,11 +33,11 @@ export const Team = () => {
   }
 
   return (
-    <section id="team" className="py-20 bg-white">
+    <section id="team" className="py-20 bg-black">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-slate-900">Meet Our Team</h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h2 className="text-4xl font-bold mb-4 text-blue-400">Meet Our Team</h2>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Talented professionals passionate about creating exceptional visual content
           </p>
         </div>
@@ -53,12 +53,12 @@ export const Team = () => {
                 />
               </div>
               
-              <h3 className="text-xl font-bold text-slate-900 mb-2">{member.name}</h3>
-              <p className="text-purple-600 font-medium mb-2">{member.role}</p>
-              <p className="text-gray-500 mb-3">{member.experience} experience</p>
+              <h3 className="text-xl font-bold text-white mb-2">{member.name}</h3>
+              <p className="text-blue-400 font-medium mb-2">{member.role}</p>
+              <p className="text-gray-400 mb-3">{member.experience} experience</p>
               
               {member.bio && (
-                <p className="text-gray-600 text-sm leading-relaxed">{member.bio}</p>
+                <p className="text-gray-300 text-sm leading-relaxed">{member.bio}</p>
               )}
             </div>
           ))}

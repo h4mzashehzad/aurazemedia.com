@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Phone, Mail } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "@/integrations/supabase/types";
 
@@ -89,10 +89,10 @@ export const Contact = () => {
   };
 
   return (
-    <section id="contact" className="py-20 bg-gray-800">
+    <section id="contact" className="py-20 bg-black">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-white">Get In Touch</h2>
+          <h2 className="text-4xl font-bold mb-4 text-blue-400">Get In Touch</h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Ready to capture your special moments? Let's discuss your project
           </p>
@@ -172,7 +172,7 @@ export const Contact = () => {
 
                 <Button 
                   type="submit" 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                   disabled={submitInquiry.isPending}
                 >
                   {submitInquiry.isPending ? 'Sending...' : 'Send Message'}
@@ -190,7 +190,7 @@ export const Contact = () => {
               <CardContent className="space-y-6">
                 {contactInfo?.phone && (
                   <div className="flex items-start gap-4">
-                    <Phone className="w-6 h-6 text-purple-400 mt-1" />
+                    <Phone className="w-6 h-6 text-blue-400 mt-1" />
                     <div>
                       <h3 className="font-medium text-white">Phone</h3>
                       <p className="text-gray-400">{contactInfo.phone}</p>
@@ -200,7 +200,7 @@ export const Contact = () => {
 
                 {contactInfo?.email && (
                   <div className="flex items-start gap-4">
-                    <Mail className="w-6 h-6 text-purple-400 mt-1" />
+                    <Mail className="w-6 h-6 text-blue-400 mt-1" />
                     <div>
                       <h3 className="font-medium text-white">Email</h3>
                       <p className="text-gray-400">{contactInfo.email}</p>
@@ -210,7 +210,7 @@ export const Contact = () => {
 
                 {contactInfo?.address && (
                   <div className="flex items-start gap-4">
-                    <MapPin className="w-6 h-6 text-purple-400 mt-1" />
+                    <MapPin className="w-6 h-6 text-blue-400 mt-1" />
                     <div>
                       <h3 className="font-medium text-white">Address</h3>
                       <p className="text-gray-400">{contactInfo.address}</p>
@@ -220,24 +220,24 @@ export const Contact = () => {
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 border-purple-600/50">
+            <Card className="bg-gray-900 border-blue-500/50">
               <CardContent className="p-6">
-                <h3 className="text-xl font-bold text-white mb-4">Why Choose Us?</h3>
+                <h3 className="text-xl font-bold text-blue-400 mb-4">Why Choose Us?</h3>
                 <ul className="space-y-3 text-gray-300">
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     Professional quality guaranteed
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     Quick turnaround times
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     Competitive pricing
                   </li>
                   <li className="flex items-center gap-2">
-                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                     Experienced team
                   </li>
                 </ul>

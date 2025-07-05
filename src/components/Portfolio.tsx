@@ -40,12 +40,12 @@ export const Portfolio = () => {
 
   if (isLoading) {
     return (
-      <section id="portfolio" className="py-20 bg-gray-900">
+      <section id="portfolio" className="py-20 bg-black">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
             </div>
           </div>
         </div>
@@ -54,10 +54,10 @@ export const Portfolio = () => {
   }
 
   return (
-    <section id="portfolio" className="py-20 bg-gray-900">
+    <section id="portfolio" className="py-20 bg-black">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
+          <h2 className="text-4xl font-bold mb-4 text-blue-400">Our Portfolio</h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
             Explore our diverse collection of professional photography work across different industries
           </p>
@@ -72,7 +72,7 @@ export const Portfolio = () => {
               onClick={() => setSelectedCategory(category)}
               className={`px-6 py-2 ${
                 selectedCategory === category 
-                  ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                  ? "bg-blue-500 hover:bg-blue-600 text-white" 
                   : "border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
               }`}
             >
@@ -102,7 +102,7 @@ export const Portfolio = () => {
                       {item.category}
                     </Badge>
                     {item.is_featured && (
-                      <Badge className="bg-yellow-500 text-black">Featured</Badge>
+                      <Badge className="bg-blue-500 text-white">Featured</Badge>
                     )}
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>

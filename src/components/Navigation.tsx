@@ -48,13 +48,13 @@ export const Navigation = () => {
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-gray-900/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
+      isScrolled ? 'bg-black/95 backdrop-blur-sm shadow-lg' : 'bg-transparent'
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection('hero')}>
-            <Camera className="w-8 h-8 text-purple-400" />
+            <Camera className="w-8 h-8 text-blue-400" />
             <span className="text-xl font-bold text-white">
               {siteConfig?.name || "Tasveeri Yaadein"}
             </span>
@@ -73,7 +73,7 @@ export const Navigation = () => {
             ))}
             <Button 
               onClick={() => scrollToSection('contact')}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-6"
+              className="bg-blue-500 hover:bg-blue-600 text-white px-6"
             >
               Get Started
             </Button>
@@ -90,7 +90,7 @@ export const Navigation = () => {
 
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <div className="md:hidden bg-gray-900/95 backdrop-blur-sm border-t border-gray-700">
+          <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-700">
             <div className="py-4 space-y-3">
               {navItems.map((item) => (
                 <button
@@ -104,7 +104,7 @@ export const Navigation = () => {
               <div className="px-4 pt-2">
                 <Button 
                   onClick={() => scrollToSection('contact')}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
                 >
                   Get Started
                 </Button>
