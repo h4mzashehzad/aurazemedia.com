@@ -7,8 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, Link } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
 
 interface TeamMember {
   id: string;
@@ -24,6 +25,9 @@ interface TeamMember {
 export const TeamManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [useFileUpload, setUseFileUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -50,11 +54,38 @@ export const TeamManager = () => {
     }
   });
 
+  const uploadFile = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('team-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('team-images')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: Omit<TeamMember, 'id'>) => {
+      let imageUrl = data.image_url;
+      
+      if (useFileUpload && selectedFile) {
+        setUploading(true);
+        imageUrl = await uploadFile(selectedFile);
+      }
+
       const { error } = await supabase
         .from('team_members')
-        .insert([data]);
+        .insert([{ ...data, image_url: imageUrl }]);
       
       if (error) throw error;
     },
@@ -66,14 +97,24 @@ export const TeamManager = () => {
     },
     onError: (error) => {
       toast({ title: "Error adding team member", description: error.message, variant: "destructive" });
+    },
+    onSettled: () => {
+      setUploading(false);
     }
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: TeamMember) => {
+      let imageUrl = data.image_url;
+      
+      if (useFileUpload && selectedFile) {
+        setUploading(true);
+        imageUrl = await uploadFile(selectedFile);
+      }
+
       const { error } = await supabase
         .from('team_members')
-        .update(data)
+        .update({ ...data, image_url: imageUrl })
         .eq('id', id);
       
       if (error) throw error;
@@ -86,6 +127,9 @@ export const TeamManager = () => {
     },
     onError: (error) => {
       toast({ title: "Error updating team member", description: error.message, variant: "destructive" });
+    },
+    onSettled: () => {
+      setUploading(false);
     }
   });
 
@@ -120,10 +164,30 @@ export const TeamManager = () => {
     });
     setEditingMember(null);
     setDialogOpen(false);
+    setUseFileUpload(false);
+    setSelectedFile(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (useFileUpload && !selectedFile && !editingMember) {
+      toast({
+        title: "File Required",
+        description: "Please select a file to upload",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!useFileUpload && !formData.image_url) {
+      toast({
+        title: "URL Required",
+        description: "Please enter an image URL",
+        variant: "destructive"
+      });
+      return;
+    }
     
     if (editingMember) {
       updateMutation.mutate({
@@ -146,7 +210,37 @@ export const TeamManager = () => {
       display_order: member.display_order,
       is_active: member.is_active
     });
+    setUseFileUpload(false);
+    setSelectedFile(null);
     setDialogOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file (JPEG, PNG, GIF)",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Check file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 5MB",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+    }
   };
 
   if (isLoading) {
@@ -185,13 +279,47 @@ export const TeamManager = () => {
                   className="bg-gray-800 border-gray-600"
                 />
               </div>
-              <Input
-                placeholder="Image URL"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                required
-                className="bg-gray-800 border-gray-600"
-              />
+
+              {/* Image Input Toggle */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Link className="w-4 h-4" />
+                  <span className="text-sm">URL</span>
+                  <Switch
+                    checked={useFileUpload}
+                    onCheckedChange={setUseFileUpload}
+                  />
+                  <span className="text-sm">Upload File</span>
+                  <Upload className="w-4 h-4" />
+                </div>
+
+                {useFileUpload ? (
+                  <div className="space-y-2">
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="bg-gray-800 border-gray-600"
+                    />
+                    {selectedFile && (
+                      <div className="text-sm text-gray-400">
+                        Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Supported: JPEG, PNG, GIF. Max size: 5MB
+                    </p>
+                  </div>
+                ) : (
+                  <Input
+                    placeholder="Image URL"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="bg-gray-800 border-gray-600"
+                  />
+                )}
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <Input
                   placeholder="Experience (e.g., 5+ years)"
@@ -230,8 +358,12 @@ export const TeamManager = () => {
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
-                  {editingMember ? 'Update' : 'Create'}
+                <Button 
+                  type="submit" 
+                  className="bg-blue-500 hover:bg-blue-600"
+                  disabled={uploading || createMutation.isPending || updateMutation.isPending}
+                >
+                  {uploading ? 'Uploading...' : (editingMember ? 'Update' : 'Create')}
                 </Button>
               </div>
             </form>

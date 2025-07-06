@@ -56,6 +56,7 @@ export const Portfolio = () => {
       <section id="portfolio" className="py-20 bg-black pt-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
             </div>
@@ -68,6 +69,13 @@ export const Portfolio = () => {
   return (
     <section id="portfolio" className="py-20 bg-black pt-24">
       <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-bold mb-4 text-blue-400">Our Portfolio</h2>
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            Explore our diverse collection of professional photography work across different industries
+          </p>
+        </div>
+
         {/* Category filters */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {categories.map((category) => (
