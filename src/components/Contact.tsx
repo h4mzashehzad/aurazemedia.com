@@ -43,22 +43,36 @@ export const Contact = () => {
 
   const submitInquiry = useMutation({
     mutationFn: async (data: typeof formData) => {
-      console.log('Submitting inquiry:', data);
+      console.log('Submitting inquiry with data:', data);
       
-      // Try direct insert with anon key
+      // Create the insert data object - only include project_type if it's not empty
+      const insertData: any = {
+        name: data.name,
+        email: data.email,
+        message: data.message
+      };
+
+      // Only add project_type if it's not empty string
+      if (data.project_type && data.project_type !== '') {
+        insertData.project_type = data.project_type;
+      }
+
+      console.log('Insert data prepared:', insertData);
+      
+      // Try the insert without setting status initially
       const { data: result, error } = await supabase
         .from('contact_inquiries')
-        .insert([{
-          name: data.name,
-          email: data.email,
-          project_type: data.project_type === '' ? null : data.project_type,
-          message: data.message,
-          status: 'new'
-        }])
+        .insert([insertData])
         .select();
       
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Supabase insert error:', error);
+        console.error('Error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
         throw new Error(`Failed to submit inquiry: ${error.message}`);
       }
       
@@ -84,6 +98,8 @@ export const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with data:', formData);
+    
     if (!formData.name || !formData.email || !formData.message) {
       toast({
         title: "Missing Information",
@@ -92,6 +108,7 @@ export const Contact = () => {
       });
       return;
     }
+    
     submitInquiry.mutate(formData);
   };
 
