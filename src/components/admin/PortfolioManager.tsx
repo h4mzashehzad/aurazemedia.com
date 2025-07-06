@@ -48,12 +48,28 @@ export const PortfolioManager = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Fetch dynamic categories from database
+  const { data: categories } = useQuery({
+    queryKey: ['portfolio-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('portfolio_categories')
+        .select('name')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data.map(cat => cat.name);
+    }
+  });
+
   const { data: portfolioItems, isLoading } = useQuery({
     queryKey: ['admin-portfolio'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('portfolio_items')
         .select('*')
+        .order('is_featured', { ascending: false })
         .order('display_order', { ascending: true });
       
       if (error) throw error;
@@ -299,11 +315,9 @@ export const PortfolioManager = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Real Estate">Real Estate</SelectItem>
-                    <SelectItem value="Medical">Medical</SelectItem>
-                    <SelectItem value="Clothing">Clothing</SelectItem>
-                    <SelectItem value="Food">Food</SelectItem>
-                    <SelectItem value="Construction">Construction</SelectItem>
+                    {categories?.map((category) => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

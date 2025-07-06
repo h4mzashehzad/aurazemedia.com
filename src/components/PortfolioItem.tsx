@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, Maximize, X } from "lucide-react";
+import { Play, Maximize, X, Pause } from "lucide-react";
 
 interface PortfolioItemProps {
   item: {
@@ -20,6 +20,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [textSize, setTextSize] = useState('text-xl');
   const videoRef = useRef<HTMLVideoElement>(null);
+  const maximizedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isVideoFile = (url: string) => {
@@ -54,28 +55,38 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     return () => resizeObserver.disconnect();
   }, []);
 
-  const handlePlayVideo = () => {
+  const handlePlayVideo = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (videoRef.current) {
       if (isPlaying) {
         videoRef.current.pause();
+        setIsPlaying(false);
       } else {
-        videoRef.current.play();
+        videoRef.current.play().catch(console.error);
+        setIsPlaying(true);
       }
-      setIsPlaying(!isPlaying);
     }
   };
 
-  const handleMaximize = () => {
+  const handleMaximize = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsMaximized(true);
   };
 
   const handleCloseMaximized = () => {
     setIsMaximized(false);
-    if (videoRef.current && isPlaying) {
+    if (maximizedVideoRef.current) {
+      maximizedVideoRef.current.pause();
+    }
+    if (videoRef.current) {
       videoRef.current.pause();
       setIsPlaying(false);
     }
   };
+
+  // Handle video events
+  const handleVideoPlay = () => setIsPlaying(true);
+  const handleVideoPause = () => setIsPlaying(false);
 
   return (
     <>
@@ -101,8 +112,10 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
               className="w-full object-cover transition-transform duration-500"
               muted
               loop
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
+              playsInline
+              onPlay={handleVideoPlay}
+              onPause={handleVideoPause}
+              onClick={(e) => e.stopPropagation()}
             />
             
             {/* Video overlay and play button */}
@@ -113,7 +126,11 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
                 size="lg"
                 className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-sm"
               >
-                <Play className={`w-8 h-8 ${isPlaying ? 'opacity-50' : 'opacity-100'}`} />
+                {isPlaying ? (
+                  <Pause className="w-8 h-8" />
+                ) : (
+                  <Play className="w-8 h-8" />
+                )}
               </Button>
             </div>
           </div>
@@ -159,10 +176,12 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
             
             {isVideoFile(item.image_url) ? (
               <video
+                ref={maximizedVideoRef}
                 src={item.image_url}
                 className="max-w-full max-h-full object-contain"
                 controls
                 autoPlay={isPlaying}
+                playsInline
               />
             ) : (
               <img

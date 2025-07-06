@@ -23,7 +23,7 @@ export const Portfolio = () => {
     }
   });
 
-  // Fetch portfolio items with featured items prioritized
+  // Fetch portfolio items with featured items prioritized and proper sorting
   const { data: portfolioItems, isLoading } = useQuery({
     queryKey: ['portfolio-items'],
     queryFn: async () => {
@@ -31,6 +31,7 @@ export const Portfolio = () => {
         .from('portfolio_items')
         .select('*')
         .order('is_featured', { ascending: false })
+        .order('display_order', { ascending: true })
         .order('created_at', { ascending: false });
       
       if (error) throw error;
