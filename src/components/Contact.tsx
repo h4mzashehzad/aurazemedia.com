@@ -53,7 +53,7 @@ export const Contact = () => {
       };
 
       // Only add project_type if it's not empty string
-      if (data.project_type && data.project_type !== '') {
+      if (data.project_type) {
         insertData.project_type = data.project_type;
       }
 
