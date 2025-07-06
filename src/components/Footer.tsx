@@ -19,7 +19,6 @@ export const Footer = () => {
   });
 
   const siteConfig = settings?.value as any;
-  const contactInfo = siteConfig?.contact;
 
   return (
     <footer className="bg-black text-white py-16 border-t border-gray-800">
@@ -29,7 +28,7 @@ export const Footer = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Camera className="w-8 h-8 text-blue-400" />
-              <h3 className="text-2xl font-bold">{siteConfig?.name || "Tasveeri Yaadein"}</h3>
+              <h3 className="text-2xl font-bold">{siteConfig?.name || "Auraze Media"}</h3>
             </div>
             <p className="text-gray-400 leading-relaxed">
               {siteConfig?.tagline || "Capturing Moments, Creating Memories"}
@@ -82,41 +81,35 @@ export const Footer = () => {
           <div className="space-y-4">
             <h4 className="text-lg font-semibold text-blue-400">Contact Info</h4>
             <div className="space-y-3 text-gray-400">
-              {contactInfo?.phone && (
-                <div className="flex items-center gap-3">
-                  <Phone className="w-4 h-4 text-blue-400" />
-                  <a 
-                    href={`tel:${contactInfo.phone}`}
-                    className="text-sm hover:text-blue-400 transition-colors"
-                  >
-                    {contactInfo.phone}
-                  </a>
-                </div>
-              )}
-              {contactInfo?.email && (
-                <div className="flex items-center gap-3">
-                  <Mail className="w-4 h-4 text-blue-400" />
-                  <a 
-                    href={`mailto:${contactInfo.email}`}
-                    className="text-sm hover:text-blue-400 transition-colors"
-                  >
-                    {contactInfo.email}
-                  </a>
-                </div>
-              )}
-              {contactInfo?.address && (
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-4 h-4 text-blue-400 mt-0.5" />
-                  <span className="text-sm leading-relaxed">{contactInfo.address}</span>
-                </div>
-              )}
+              <div className="flex items-center gap-3">
+                <Phone className="w-4 h-4 text-blue-400" />
+                <a 
+                  href="tel:+92-XXX-XXXXXXX"
+                  className="text-sm hover:text-blue-400 transition-colors"
+                >
+                  +92-XXX-XXXXXXX
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-blue-400" />
+                <a 
+                  href="mailto:info@aurazemedia.com"
+                  className="text-sm hover:text-blue-400 transition-colors"
+                >
+                  info@aurazemedia.com
+                </a>
+              </div>
+              <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 text-blue-400 mt-0.5" />
+                <span className="text-sm leading-relaxed">Islamabad, Pakistan</span>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} {siteConfig?.name || "Tasveeri Yaadein"}. Powered by{" "}
+            &copy; {new Date().getFullYear()} {siteConfig?.name || "Auraze Media"}. Powered by{" "}
             <a 
               href="https://hamzaworks.com" 
               target="_blank" 

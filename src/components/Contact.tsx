@@ -45,21 +45,21 @@ export const Contact = () => {
     mutationFn: async (data: typeof formData) => {
       console.log('Submitting inquiry:', data);
       
-      // Insert directly without checking authentication since we have RLS policy for anonymous inserts
+      // Try direct insert with anon key
       const { data: result, error } = await supabase
         .from('contact_inquiries')
-        .insert({
+        .insert([{
           name: data.name,
           email: data.email,
-          project_type: data.project_type || null,
+          project_type: data.project_type === '' ? null : data.project_type,
           message: data.message,
           status: 'new'
-        })
+        }])
         .select();
       
       if (error) {
         console.error('Supabase error:', error);
-        throw error;
+        throw new Error(`Failed to submit inquiry: ${error.message}`);
       }
       
       console.log('Inquiry submitted successfully:', result);
@@ -76,7 +76,7 @@ export const Contact = () => {
       console.error('Submission error:', error);
       toast({
         title: "Error",
-        description: "Failed to send message. Please try again.",
+        description: error.message || "Failed to send message. Please try again.",
         variant: "destructive",
       });
     }
@@ -210,30 +210,26 @@ export const Contact = () => {
                   </div>
                 )}
 
-                {contactInfo?.email && (
-                  <div className="flex items-start gap-4">
-                    <Mail className="w-6 h-6 text-blue-400 mt-1" />
-                    <div>
-                      <h3 className="font-medium text-white">Email</h3>
-                      <a 
-                        href={`mailto:${contactInfo.email}`}
-                        className="text-gray-400 hover:text-blue-400 transition-colors"
-                      >
-                        {contactInfo.email}
-                      </a>
-                    </div>
+                <div className="flex items-start gap-4">
+                  <Mail className="w-6 h-6 text-blue-400 mt-1" />
+                  <div>
+                    <h3 className="font-medium text-white">Email</h3>
+                    <a 
+                      href="mailto:info@aurazemedia.com"
+                      className="text-gray-400 hover:text-blue-400 transition-colors"
+                    >
+                      info@aurazemedia.com
+                    </a>
                   </div>
-                )}
+                </div>
 
-                {contactInfo?.address && (
-                  <div className="flex items-start gap-4">
-                    <MapPin className="w-6 h-6 text-blue-400 mt-1" />
-                    <div>
-                      <h3 className="font-medium text-white">Address</h3>
-                      <p className="text-gray-400">{contactInfo.address}</p>
-                    </div>
+                <div className="flex items-start gap-4">
+                  <MapPin className="w-6 h-6 text-blue-400 mt-1" />
+                  <div>
+                    <h3 className="font-medium text-white">Address</h3>
+                    <p className="text-gray-400">Islamabad, Pakistan</p>
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
 
