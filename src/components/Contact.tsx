@@ -43,7 +43,7 @@ export const Contact = () => {
 
   const submitInquiry = useMutation({
     mutationFn: async (data: typeof formData) => {
-      console.log('Submitting inquiry with data:', data);
+      console.log('✅ Starting form submission with data:', data);
       
       // Create the insert data object - only include project_type if it's not empty
       const insertData: any = {
@@ -57,16 +57,16 @@ export const Contact = () => {
         insertData.project_type = data.project_type;
       }
 
-      console.log('Insert data prepared:', insertData);
+      console.log('✅ Insert data prepared:', insertData);
       
-      // Try the insert without setting status initially
+      // Submit the inquiry to Supabase
       const { data: result, error } = await supabase
         .from('contact_inquiries')
         .insert([insertData])
         .select();
       
       if (error) {
-        console.error('Supabase insert error:', error);
+        console.error('❌ Supabase insert error:', error);
         console.error('Error details:', {
           message: error.message,
           details: error.details,
@@ -76,10 +76,11 @@ export const Contact = () => {
         throw new Error(`Failed to submit inquiry: ${error.message}`);
       }
       
-      console.log('Inquiry submitted successfully:', result);
+      console.log('✅ Inquiry submitted successfully:', result);
       return result;
     },
     onSuccess: () => {
+      console.log('✅ Form submission successful!');
       toast({
         title: "Message Sent!",
         description: "We'll get back to you within 24 hours.",
@@ -87,7 +88,7 @@ export const Contact = () => {
       setFormData({ name: '', email: '', project_type: '', message: '' });
     },
     onError: (error) => {
-      console.error('Submission error:', error);
+      console.error('❌ Form submission failed:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to send message. Please try again.",
@@ -98,9 +99,10 @@ export const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
+    console.log('📝 Form submitted with data:', formData);
     
     if (!formData.name || !formData.email || !formData.message) {
+      console.log('❌ Form validation failed - missing required fields');
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -109,6 +111,7 @@ export const Contact = () => {
       return;
     }
     
+    console.log('✅ Form validation passed, submitting...');
     submitInquiry.mutate(formData);
   };
 
