@@ -29,6 +29,21 @@ export const Navigation = () => {
     }
   });
 
+  // Fetch dynamic categories for portfolio dropdown
+  const { data: categories } = useQuery({
+    queryKey: ['portfolio-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('portfolio_categories')
+        .select('name')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data.map(cat => cat.name);
+    }
+  });
+
   const siteConfig = settings?.value as any;
 
   useEffect(() => {
@@ -55,7 +70,8 @@ export const Navigation = () => {
     }));
   };
 
-  const portfolioCategories = ['All', 'Real Estate', 'Medical', 'Clothing', 'Food', 'Construction'];
+  // Create filter options with All + dynamic categories
+  const portfolioCategories = ['All', ...(categories || [])];
 
   const navItems = [
     { id: 'team', label: 'Team' },

@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { PortfolioItem } from "./PortfolioItem";
 
 export const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -58,10 +58,6 @@ export const Portfolio = () => {
     selectedCategory === 'All' || item.category === selectedCategory
   );
 
-  const isVideoFile = (url: string) => {
-    return url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video');
-  };
-
   if (isLoading) {
     return (
       <section id="portfolio" className="py-20 bg-black pt-24">
@@ -98,43 +94,7 @@ export const Portfolio = () => {
         {/* Portfolio grid - 4 columns on desktop, 2 on mobile */}
         <div className="columns-2 md:columns-4 gap-6 space-y-6">
           {filteredItems?.map((item) => (
-            <div
-              key={item.id}
-              className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid"
-            >
-              {isVideoFile(item.image_url) ? (
-                <video
-                  src={item.image_url}
-                  className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
-              ) : (
-                <img
-                  src={item.image_url}
-                  alt={item.title}
-                  className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              )}
-              
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="absolute bottom-0 left-0 right-0 p-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant="secondary" className="bg-white/20 text-white">
-                      {item.category}
-                    </Badge>
-                    {item.is_featured && (
-                      <Badge className="bg-blue-500 text-white">Featured</Badge>
-                    )}
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">{item.title}</h3>
-                  <p className="text-gray-200 text-sm">{item.caption}</p>
-                </div>
-              </div>
-            </div>
+            <PortfolioItem key={item.id} item={item} />
           ))}
         </div>
 
