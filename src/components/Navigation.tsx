@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Camera, Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -70,10 +70,9 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection('portfolio')}>
-            <Camera className="w-8 h-8 text-blue-400" />
+          <div className="flex items-center cursor-pointer" onClick={() => scrollToSection('portfolio')}>
             <span className="text-xl font-bold text-white">
-              {siteConfig?.name || "Tasveeri Yaadein"}
+              Auraze Media
             </span>
           </div>
 

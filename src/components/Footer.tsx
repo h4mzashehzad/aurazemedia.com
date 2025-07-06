@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Camera, Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 
 export const Footer = () => {
   const { data: settings } = useQuery({
@@ -26,9 +26,8 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Camera className="w-8 h-8 text-blue-400" />
-              <h3 className="text-2xl font-bold">{siteConfig?.name || "Auraze Media"}</h3>
+            <div className="flex items-center">
+              <h3 className="text-2xl font-bold">Auraze Media</h3>
             </div>
             <p className="text-gray-400 leading-relaxed">
               {siteConfig?.tagline || "Capturing Moments, Creating Memories"}
@@ -84,10 +83,10 @@ export const Footer = () => {
               <div className="flex items-center gap-3">
                 <Phone className="w-4 h-4 text-blue-400" />
                 <a 
-                  href="tel:+92-XXX-XXXXXXX"
+                  href="tel:+92-300-1234567"
                   className="text-sm hover:text-blue-400 transition-colors"
                 >
-                  +92-XXX-XXXXXXX
+                  +92-300-1234567
                 </a>
               </div>
               <div className="flex items-center gap-3">
@@ -109,7 +108,7 @@ export const Footer = () => {
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
           <p>
-            &copy; {new Date().getFullYear()} {siteConfig?.name || "Auraze Media"}. Powered by{" "}
+            &copy; {new Date().getFullYear()} Auraze Media. Powered by{" "}
             <a 
               href="https://hamzaworks.com" 
               target="_blank" 
