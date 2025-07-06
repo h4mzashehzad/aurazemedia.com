@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,9 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Star, Upload, Link } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Database } from '@/integrations/supabase/types';
+import { Switch } from '@/components/ui/switch';
 
 type CategoryType = Database['public']['Enums']['project_category'];
 type AspectRatioType = Database['public']['Enums']['aspect_ratio'];
@@ -31,6 +31,9 @@ interface PortfolioItem {
 export const PortfolioManager = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
+  const [useFileUpload, setUseFileUpload] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     category: 'Real Estate' as CategoryType,
@@ -58,12 +61,40 @@ export const PortfolioManager = () => {
     }
   });
 
+  const uploadFile = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('portfolio-files')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      throw uploadError;
+    }
+
+    const { data } = supabase.storage
+      .from('portfolio-files')
+      .getPublicUrl(filePath);
+
+    return data.publicUrl;
+  };
+
   const createMutation = useMutation({
     mutationFn: async (data: Omit<PortfolioItem, 'id'>) => {
+      let imageUrl = data.image_url;
+      
+      if (useFileUpload && selectedFile) {
+        setUploading(true);
+        imageUrl = await uploadFile(selectedFile);
+      }
+
       const { error } = await supabase
         .from('portfolio_items')
         .insert({
           ...data,
+          image_url: imageUrl,
           tags: data.tags.length > 0 ? data.tags : []
         });
       
@@ -77,15 +108,26 @@ export const PortfolioManager = () => {
     },
     onError: (error) => {
       toast({ title: "Error creating portfolio item", description: error.message, variant: "destructive" });
+    },
+    onSettled: () => {
+      setUploading(false);
     }
   });
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...data }: PortfolioItem) => {
+      let imageUrl = data.image_url;
+      
+      if (useFileUpload && selectedFile) {
+        setUploading(true);
+        imageUrl = await uploadFile(selectedFile);
+      }
+
       const { error } = await supabase
         .from('portfolio_items')
         .update({
           ...data,
+          image_url: imageUrl,
           tags: data.tags.length > 0 ? data.tags : []
         })
         .eq('id', id);
@@ -100,6 +142,9 @@ export const PortfolioManager = () => {
     },
     onError: (error) => {
       toast({ title: "Error updating portfolio item", description: error.message, variant: "destructive" });
+    },
+    onSettled: () => {
+      setUploading(false);
     }
   });
 
@@ -135,10 +180,31 @@ export const PortfolioManager = () => {
     });
     setEditingItem(null);
     setDialogOpen(false);
+    setUseFileUpload(false);
+    setSelectedFile(null);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (useFileUpload && !selectedFile && !editingItem) {
+      toast({
+        title: "File Required",
+        description: "Please select a file to upload",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!useFileUpload && !formData.image_url) {
+      toast({
+        title: "URL Required",
+        description: "Please enter an image URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
     const tagsArray = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
     
     if (editingItem) {
@@ -167,7 +233,37 @@ export const PortfolioManager = () => {
       is_featured: item.is_featured,
       display_order: item.display_order
     });
+    setUseFileUpload(false);
+    setSelectedFile(null);
     setDialogOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Check file type
+      const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'video/mp4', 'video/webm', 'video/ogg'];
+      if (!validTypes.includes(file.type)) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image (JPEG, PNG, GIF) or video (MP4, WebM, OGG) file",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Check file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select a file smaller than 10MB",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+    }
   };
 
   if (isLoading) {
@@ -211,13 +307,47 @@ export const PortfolioManager = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Input
-                placeholder="Image URL"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                required
-                className="bg-gray-800 border-gray-600"
-              />
+
+              {/* Image/Video Input Toggle */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Link className="w-4 h-4" />
+                  <span className="text-sm">URL</span>
+                  <Switch
+                    checked={useFileUpload}
+                    onCheckedChange={setUseFileUpload}
+                  />
+                  <span className="text-sm">Upload File</span>
+                  <Upload className="w-4 h-4" />
+                </div>
+
+                {useFileUpload ? (
+                  <div className="space-y-2">
+                    <Input
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={handleFileChange}
+                      className="bg-gray-800 border-gray-600"
+                    />
+                    {selectedFile && (
+                      <div className="text-sm text-gray-400">
+                        Selected: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Supported: Images (JPEG, PNG, GIF) and Videos (MP4, WebM, OGG). Max size: 10MB
+                    </p>
+                  </div>
+                ) : (
+                  <Input
+                    placeholder="Image/Video URL"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="bg-gray-800 border-gray-600"
+                  />
+                )}
+              </div>
+
               <Textarea
                 placeholder="Caption"
                 value={formData.caption}
@@ -264,8 +394,12 @@ export const PortfolioManager = () => {
                 <Button type="button" variant="outline" onClick={resetForm}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-blue-500 hover:bg-blue-600">
-                  {editingItem ? 'Update' : 'Create'}
+                <Button 
+                  type="submit" 
+                  className="bg-blue-500 hover:bg-blue-600"
+                  disabled={uploading || createMutation.isPending || updateMutation.isPending}
+                >
+                  {uploading ? 'Uploading...' : (editingItem ? 'Update' : 'Create')}
                 </Button>
               </div>
             </form>
@@ -296,7 +430,11 @@ export const PortfolioManager = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover rounded mb-2" />
+              {item.image_url.includes('video') || item.image_url.endsWith('.mp4') || item.image_url.endsWith('.webm') || item.image_url.endsWith('.ogg') ? (
+                <video src={item.image_url} className="w-full h-32 object-cover rounded mb-2" controls />
+              ) : (
+                <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover rounded mb-2" />
+              )}
               <p className="text-gray-400 text-sm mb-2">{item.caption}</p>
               <div className="flex flex-wrap gap-1">
                 {item.tags.map((tag, index) => (
