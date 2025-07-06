@@ -109,9 +109,6 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
               {loading ? "Signing in..." : "Sign In"}
             </Button>
           </form>
-          <div className="mt-4 text-sm text-gray-400 text-center">
-            <p>Default login: admin@tasveeriyaadein.com / admin123</p>
-          </div>
         </CardContent>
       </Card>
     </div>

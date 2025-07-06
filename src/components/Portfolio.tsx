@@ -40,26 +40,16 @@ export const Portfolio = () => {
     selectedCategory === 'All' || item.category === selectedCategory
   );
 
-  const getGridClass = (aspectRatio: string) => {
-    switch (aspectRatio) {
-      case 'wide':
-        return 'md:col-span-2';
-      case 'tall':
-        return 'md:row-span-2';
-      default:
-        return '';
-    }
+  const isVideoFile = (url: string) => {
+    return url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video');
   };
 
   if (isLoading) {
     return (
       <section id="portfolio" className="py-20 bg-black pt-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
-            <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
-            </div>
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
           </div>
         </div>
       </section>
@@ -69,13 +59,6 @@ export const Portfolio = () => {
   return (
     <section id="portfolio" className="py-20 bg-black pt-24">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold mb-4 text-blue-400">Our Portfolio</h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Explore our diverse collection of professional photography work across different industries
-          </p>
-        </div>
-
         {/* Category filters */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {categories.map((category) => (
@@ -101,11 +84,22 @@ export const Portfolio = () => {
               key={item.id}
               className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid"
             >
-              <img
-                src={item.image_url}
-                alt={item.title}
-                className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
-              />
+              {isVideoFile(item.image_url) ? (
+                <video
+                  src={item.image_url}
+                  className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                />
+              ) : (
+                <img
+                  src={item.image_url}
+                  alt={item.title}
+                  className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
+                />
+              )}
               
               {/* Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
