@@ -44,19 +44,26 @@ export const Contact = () => {
   const submitInquiry = useMutation({
     mutationFn: async (data: typeof formData) => {
       console.log('Submitting inquiry:', data);
-      const { error } = await supabase
+      
+      // Insert directly without checking authentication since we have RLS policy for anonymous inserts
+      const { data: result, error } = await supabase
         .from('contact_inquiries')
         .insert({
           name: data.name,
           email: data.email,
           project_type: data.project_type || null,
-          message: data.message
-        });
+          message: data.message,
+          status: 'new'
+        })
+        .select();
       
       if (error) {
         console.error('Supabase error:', error);
         throw error;
       }
+      
+      console.log('Inquiry submitted successfully:', result);
+      return result;
     },
     onSuccess: () => {
       toast({
@@ -193,7 +200,12 @@ export const Contact = () => {
                     <Phone className="w-6 h-6 text-blue-400 mt-1" />
                     <div>
                       <h3 className="font-medium text-white">Phone</h3>
-                      <p className="text-gray-400">{contactInfo.phone}</p>
+                      <a 
+                        href={`tel:${contactInfo.phone}`}
+                        className="text-gray-400 hover:text-blue-400 transition-colors"
+                      >
+                        {contactInfo.phone}
+                      </a>
                     </div>
                   </div>
                 )}
@@ -203,7 +215,12 @@ export const Contact = () => {
                     <Mail className="w-6 h-6 text-blue-400 mt-1" />
                     <div>
                       <h3 className="font-medium text-white">Email</h3>
-                      <p className="text-gray-400">{contactInfo.email}</p>
+                      <a 
+                        href={`mailto:${contactInfo.email}`}
+                        className="text-gray-400 hover:text-blue-400 transition-colors"
+                      >
+                        {contactInfo.email}
+                      </a>
                     </div>
                   </div>
                 )}

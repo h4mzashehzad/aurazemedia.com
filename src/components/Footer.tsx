@@ -85,13 +85,23 @@ export const Footer = () => {
               {contactInfo?.phone && (
                 <div className="flex items-center gap-3">
                   <Phone className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm">{contactInfo.phone}</span>
+                  <a 
+                    href={`tel:${contactInfo.phone}`}
+                    className="text-sm hover:text-blue-400 transition-colors"
+                  >
+                    {contactInfo.phone}
+                  </a>
                 </div>
               )}
               {contactInfo?.email && (
                 <div className="flex items-center gap-3">
                   <Mail className="w-4 h-4 text-blue-400" />
-                  <span className="text-sm">{contactInfo.email}</span>
+                  <a 
+                    href={`mailto:${contactInfo.email}`}
+                    className="text-sm hover:text-blue-400 transition-colors"
+                  >
+                    {contactInfo.email}
+                  </a>
                 </div>
               )}
               {contactInfo?.address && (
@@ -105,7 +115,18 @@ export const Footer = () => {
         </div>
 
         <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-500">
-          <p>&copy; {new Date().getFullYear()} {siteConfig?.name || "Tasveeri Yaadein"}. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} {siteConfig?.name || "Tasveeri Yaadein"}. Powered by{" "}
+            <a 
+              href="https://hamzaworks.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Hamza Works
+            </a>
+            .
+          </p>
         </div>
       </div>
     </footer>
