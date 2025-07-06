@@ -8,13 +8,30 @@ import { Badge } from "@/components/ui/badge";
 export const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
+  // Fetch dynamic categories
+  const { data: categories } = useQuery({
+    queryKey: ['portfolio-categories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('portfolio_categories')
+        .select('name')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      
+      if (error) throw error;
+      return data.map(cat => cat.name);
+    }
+  });
+
+  // Fetch portfolio items with featured items prioritized
   const { data: portfolioItems, isLoading } = useQuery({
     queryKey: ['portfolio-items'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('portfolio_items')
         .select('*')
-        .order('display_order', { ascending: true });
+        .order('is_featured', { ascending: false })
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       return data;
@@ -34,7 +51,8 @@ export const Portfolio = () => {
     };
   }, []);
 
-  const categories = ['All', 'Real Estate', 'Medical', 'Clothing', 'Food', 'Construction'];
+  // Create filter options with All + dynamic categories
+  const filterOptions = ['All', ...(categories || [])];
 
   const filteredItems = portfolioItems?.filter(item => 
     selectedCategory === 'All' || item.category === selectedCategory
@@ -61,7 +79,7 @@ export const Portfolio = () => {
       <div className="container mx-auto px-4">
         {/* Category filters */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {categories.map((category) => (
+          {filterOptions.map((category) => (
             <Button
               key={category}
               variant={selectedCategory === category ? "default" : "outline"}
