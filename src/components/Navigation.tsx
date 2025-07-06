@@ -1,9 +1,15 @@
 
 import { useState, useEffect } from "react";
-import { Camera, Menu, X } from "lucide-react";
+import { Camera, Menu, X, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Navigation = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -39,8 +45,19 @@ export const Navigation = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const filterPortfolioByCategory = (category: string) => {
+    // Scroll to portfolio section first
+    document.getElementById('portfolio')?.scrollIntoView({ behavior: 'smooth' });
+    
+    // Dispatch a custom event to filter the portfolio
+    window.dispatchEvent(new CustomEvent('filterPortfolio', { 
+      detail: { category } 
+    }));
+  };
+
+  const portfolioCategories = ['All', 'Real Estate', 'Medical', 'Clothing', 'Food', 'Construction'];
+
   const navItems = [
-    { id: 'portfolio', label: 'Portfolio' },
     { id: 'team', label: 'Team' },
     { id: 'pricing', label: 'Pricing' },
     { id: 'contact', label: 'Contact' }
@@ -53,7 +70,7 @@ export const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection('hero')}>
+          <div className="flex items-center gap-3 cursor-pointer" onClick={() => scrollToSection('portfolio')}>
             <Camera className="w-8 h-8 text-blue-400" />
             <span className="text-xl font-bold text-white">
               {siteConfig?.name || "Tasveeri Yaadein"}
@@ -62,6 +79,25 @@ export const Navigation = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            {/* Portfolio Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors font-medium bg-transparent border-none outline-none">
+                Portfolio
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-black/95 backdrop-blur-sm border-gray-700">
+                {portfolioCategories.map((category) => (
+                  <DropdownMenuItem
+                    key={category}
+                    onClick={() => filterPortfolioByCategory(category)}
+                    className="text-gray-300 hover:text-white hover:bg-gray-800 cursor-pointer"
+                  >
+                    {category}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -92,6 +128,22 @@ export const Navigation = () => {
         {isMobileMenuOpen && (
           <div className="md:hidden bg-black/95 backdrop-blur-sm border-t border-gray-700">
             <div className="py-4 space-y-3">
+              {/* Mobile Portfolio Options */}
+              <div className="px-4">
+                <p className="text-gray-400 text-sm font-medium mb-2">Portfolio</p>
+                <div className="space-y-1 ml-2">
+                  {portfolioCategories.map((category) => (
+                    <button
+                      key={category}
+                      onClick={() => filterPortfolioByCategory(category)}
+                      className="block w-full text-left px-2 py-1 text-gray-300 hover:text-white hover:bg-gray-800 transition-colors text-sm"
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
               {navItems.map((item) => (
                 <button
                   key={item.id}

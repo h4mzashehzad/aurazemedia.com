@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -20,6 +20,19 @@ export const Portfolio = () => {
       return data;
     }
   });
+
+  // Listen for custom filter events from navigation
+  useEffect(() => {
+    const handleFilterPortfolio = (event: CustomEvent) => {
+      setSelectedCategory(event.detail.category);
+    };
+
+    window.addEventListener('filterPortfolio', handleFilterPortfolio as EventListener);
+    
+    return () => {
+      window.removeEventListener('filterPortfolio', handleFilterPortfolio as EventListener);
+    };
+  }, []);
 
   const categories = ['All', 'Real Estate', 'Medical', 'Clothing', 'Food', 'Construction'];
 
@@ -40,7 +53,7 @@ export const Portfolio = () => {
 
   if (isLoading) {
     return (
-      <section id="portfolio" className="py-20 bg-black">
+      <section id="portfolio" className="py-20 bg-black pt-24">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 text-white">Our Portfolio</h2>
@@ -54,7 +67,7 @@ export const Portfolio = () => {
   }
 
   return (
-    <section id="portfolio" className="py-20 bg-black">
+    <section id="portfolio" className="py-20 bg-black pt-24">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold mb-4 text-blue-400">Our Portfolio</h2>
