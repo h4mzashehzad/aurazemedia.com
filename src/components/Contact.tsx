@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -229,14 +228,7 @@ export const Contact = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex items-center gap-2">
-                    <MessageCircle className="w-6 h-6 text-white mt-1" />
-                    <img 
-                      src="/lovable-uploads/39766052-03bd-4b48-9c62-18e9328acf5b.png" 
-                      alt="WhatsApp" 
-                      className="w-6 h-6 mt-1"
-                    />
-                  </div>
+                  <MessageCircle className="w-6 h-6 text-white mt-1" />
                   <div>
                     <h3 className="font-medium text-white">WhatsApp</h3>
                     <a 
