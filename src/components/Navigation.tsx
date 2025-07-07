@@ -87,9 +87,11 @@ export const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center cursor-pointer" onClick={() => scrollToSection('portfolio')}>
-            <span className="text-xl font-bold text-white">
-              Auraze Media
-            </span>
+            <img 
+              src="/lovable-uploads/bf42f4a9-6ec7-47a3-8e41-dab09ae584c6.png" 
+              alt="Auraze Media" 
+              className="h-10 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation */}

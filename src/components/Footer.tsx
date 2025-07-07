@@ -27,7 +27,11 @@ export const Footer = () => {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center">
-              <h3 className="text-2xl font-bold">Auraze Media</h3>
+              <img 
+                src="/lovable-uploads/bf42f4a9-6ec7-47a3-8e41-dab09ae584c6.png" 
+                alt="Auraze Media" 
+                className="h-8 w-auto"
+              />
             </div>
             <p className="text-gray-400 leading-relaxed">
               {siteConfig?.tagline || "Capturing Moments, Creating Memories"}
