@@ -30,7 +30,7 @@ export const Footer = () => {
               <img 
                 src="/lovable-uploads/bf42f4a9-6ec7-47a3-8e41-dab09ae584c6.png" 
                 alt="Auraze Media" 
-                className="h-8 w-auto"
+                className="h-6 w-auto"
               />
             </div>
             <p className="text-gray-400 leading-relaxed">
