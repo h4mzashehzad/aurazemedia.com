@@ -90,14 +90,7 @@ export const Footer = () => {
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 text-white" />
-                  <img 
-                    src="/lovable-uploads/39766052-03bd-4b48-9c62-18e9328acf5b.png" 
-                    alt="WhatsApp" 
-                    className="w-4 h-4"
-                  />
-                </div>
+                <MessageCircle className="w-4 h-4 text-white" />
                 <a 
                   href="https://wa.me/923261234888"
                   target="_blank"

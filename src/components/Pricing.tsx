@@ -84,7 +84,7 @@ export const Pricing = () => {
                 </ul>
                 
                 <Button 
-                  className={`w-full ${pkg.is_popular ? 'bg-white hover:bg-gray-200 text-black' : 'bg-gray-700 hover:bg-gray-600'} text-white`}
+                  className={`w-full ${pkg.is_popular ? 'bg-white hover:bg-gray-200 text-black' : 'bg-gray-700 hover:bg-gray-600 text-white'}`}
                   onClick={scrollToContact}
                 >
                   Get Started

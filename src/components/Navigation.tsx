@@ -124,7 +124,7 @@ export const Navigation = () => {
             ))}
             <Button 
               onClick={() => scrollToSection('contact')}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6"
+              className="bg-white hover:bg-gray-200 text-black px-6"
             >
               Get Started
             </Button>
@@ -171,7 +171,7 @@ export const Navigation = () => {
               <div className="px-4 pt-2">
                 <Button 
                   onClick={() => scrollToSection('contact')}
-                  className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                  className="w-full bg-white hover:bg-gray-200 text-black"
                 >
                   Get Started
                 </Button>
