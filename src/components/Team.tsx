@@ -42,9 +42,9 @@ export const Team = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-8">
+        <div className="flex flex-wrap justify-between gap-12 max-w-6xl mx-auto">
           {teamMembers?.map((member) => (
-            <div key={member.id} className="text-center group">
+            <div key={member.id} className="text-center group flex-1 min-w-64">
               <div className="relative mb-6 overflow-hidden rounded-full w-48 h-48 mx-auto shadow-lg group-hover:shadow-xl transition-shadow duration-300">
                 <img
                   src={member.image_url}
