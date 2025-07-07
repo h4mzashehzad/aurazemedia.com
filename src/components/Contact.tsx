@@ -229,7 +229,14 @@ export const Contact = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <MessageCircle className="w-6 h-6 text-white mt-1" />
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="w-6 h-6 text-white mt-1" />
+                    <img 
+                      src="/lovable-uploads/39766052-03bd-4b48-9c62-18e9328acf5b.png" 
+                      alt="WhatsApp" 
+                      className="w-6 h-6 mt-1"
+                    />
+                  </div>
                   <div>
                     <h3 className="font-medium text-white">WhatsApp</h3>
                     <a 
