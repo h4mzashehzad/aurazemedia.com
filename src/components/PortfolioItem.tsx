@@ -108,7 +108,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
                 {item.category}
               </Badge>
               {item.is_featured && (
-                <Badge className="bg-blue-500 text-white text-xs">Featured</Badge>
+                <Badge className="bg-white text-black text-xs">Featured</Badge>
               )}
             </div>
             <h3 className={`${textSize} font-bold text-white mb-1`}>{item.title}</h3>
@@ -155,7 +155,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
                   {item.category}
                 </Badge>
                 {item.is_featured && (
-                  <Badge className="bg-blue-500 text-white">Featured</Badge>
+                  <Badge className="bg-white text-black">Featured</Badge>
                 )}
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>

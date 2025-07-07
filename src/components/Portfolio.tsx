@@ -64,7 +64,7 @@ export const Portfolio = () => {
       <section id="portfolio" className="py-20 bg-black pt-24">
         <div className="container mx-auto px-4">
           <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white"></div>
           </div>
         </div>
       </section>
@@ -83,7 +83,7 @@ export const Portfolio = () => {
               onClick={() => setSelectedCategory(category)}
               className={`px-6 py-2 ${
                 selectedCategory === category 
-                  ? "bg-blue-500 hover:bg-blue-600 text-white" 
+                  ? "bg-white hover:bg-gray-200 text-black" 
                   : "border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white bg-transparent"
               }`}
             >

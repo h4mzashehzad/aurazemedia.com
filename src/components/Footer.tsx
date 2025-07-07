@@ -1,7 +1,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 
 export const Footer = () => {
   const { data: settings } = useQuery({
@@ -39,7 +39,7 @@ export const Footer = () => {
 
           {/* Services */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-400">Our Services</h4>
+            <h4 className="text-lg font-semibold text-white">Our Services</h4>
             <ul className="space-y-2 text-gray-400">
               <li>Real Estate Photography</li>
               <li>Medical Facility Shoots</li>
@@ -51,7 +51,7 @@ export const Footer = () => {
 
           {/* Quick Links */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-400">Quick Links</h4>
+            <h4 className="text-lg font-semibold text-white">Quick Links</h4>
             <ul className="space-y-2 text-gray-400">
               <li>
                 <a href="#portfolio" className="hover:text-white transition-colors cursor-pointer">
@@ -78,29 +78,40 @@ export const Footer = () => {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h4 className="text-lg font-semibold text-blue-400">Contact Info</h4>
+            <h4 className="text-lg font-semibold text-white">Contact Info</h4>
             <div className="space-y-3 text-gray-400">
               <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-blue-400" />
+                <Phone className="w-4 h-4 text-white" />
                 <a 
-                  href="tel:+92-300-1234567"
-                  className="text-sm hover:text-blue-400 transition-colors"
+                  href="tel:+92-326-1234888"
+                  className="text-sm hover:text-white transition-colors"
                 >
-                  +92-300-1234567
+                  +92 326 1234888
                 </a>
               </div>
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-blue-400" />
+                <MessageCircle className="w-4 h-4 text-white" />
+                <a 
+                  href="https://wa.me/923261234888"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:text-white transition-colors"
+                >
+                  Chat on WhatsApp
+                </a>
+              </div>
+              <div className="flex items-center gap-3">
+                <Mail className="w-4 h-4 text-white" />
                 <a 
                   href="mailto:info@aurazemedia.com"
-                  className="text-sm hover:text-blue-400 transition-colors"
+                  className="text-sm hover:text-white transition-colors"
                 >
                   info@aurazemedia.com
                 </a>
               </div>
               <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 text-blue-400 mt-0.5" />
-                <span className="text-sm leading-relaxed">Islamabad, Pakistan</span>
+                <MapPin className="w-4 h-4 text-white mt-0.5" />
+                <span className="text-sm leading-relaxed">Office 1, Floor 2, B-38, Sector F, DHA-I, Islamabad</span>
               </div>
             </div>
           </div>
@@ -113,7 +124,7 @@ export const Footer = () => {
               href="https://hamzaworks.com" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-white hover:text-gray-300 transition-colors"
             >
               Hamza Works
             </a>
