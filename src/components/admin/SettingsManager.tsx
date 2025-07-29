@@ -119,8 +119,12 @@ export const SettingsManager = () => {
     mutationFn: async (visible: boolean) => {
       const { error } = await supabase
         .from('website_settings')
-        .upsert({ key: 'pricing_section_visible', value: visible })
-        .eq('key', 'pricing_section_visible');
+        .upsert({ 
+          key: 'pricing_section_visible', 
+          value: visible 
+        }, {
+          onConflict: 'key'
+        });
       
       if (error) throw error;
     },
