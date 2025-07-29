@@ -224,9 +224,9 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
           />
         )}
         
-        {/* Content overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-0 left-0 right-0 p-4">
+        {/* Content overlay - pointer-events-none to allow video clicks */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+          <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-auto">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                 {item.category}
