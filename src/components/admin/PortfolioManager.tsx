@@ -21,6 +21,7 @@ interface PortfolioItem {
   category: string;
   image_url: string;
   video_url?: string;
+  website_url?: string;
   caption: string;
   aspect_ratio: AspectRatioType;
   tags: string[];
@@ -38,6 +39,7 @@ export const PortfolioManager = () => {
     title: '',
     category: '',
     image_url: '',
+    website_url: '',
     caption: '',
     aspect_ratio: 'square' as AspectRatioType,
     tags: '',
@@ -188,6 +190,7 @@ export const PortfolioManager = () => {
       title: '',
       category: categories?.[0] || '',
       image_url: '',
+      website_url: '',
       caption: '',
       aspect_ratio: 'square',
       tags: '',
@@ -242,6 +245,7 @@ export const PortfolioManager = () => {
       title: item.title,
       category: item.category,
       image_url: item.image_url,
+      website_url: item.website_url || '',
       caption: item.caption,
       aspect_ratio: item.aspect_ratio,
       tags: item.tags?.join(', ') || '',
@@ -360,6 +364,13 @@ export const PortfolioManager = () => {
                 )}
               </div>
 
+              <Input
+                placeholder="Website URL (optional) - e.g., https://example.com"
+                value={formData.website_url}
+                onChange={(e) => setFormData({ ...formData, website_url: e.target.value })}
+                className="bg-gray-800 border-gray-600"
+              />
+
               <Textarea
                 placeholder="Caption"
                 value={formData.caption}
@@ -448,6 +459,14 @@ export const PortfolioManager = () => {
                 <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover rounded mb-2" />
               )}
               <p className="text-gray-400 text-sm mb-2">{item.caption}</p>
+              {item.website_url && (
+                <div className="mb-2">
+                  <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400 text-xs">
+                    <Link className="w-3 h-3 mr-1" />
+                    Website Link
+                  </Badge>
+                </div>
+              )}
               <div className="flex flex-wrap gap-1">
                 {item.tags.map((tag, index) => (
                   <Badge key={index} variant="outline" className="text-xs">

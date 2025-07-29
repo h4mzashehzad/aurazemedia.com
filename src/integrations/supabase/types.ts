@@ -121,6 +121,7 @@ export type Database = {
           title: string
           updated_at: string
           video_url: string | null
+          website_url: string | null
         }
         Insert: {
           aspect_ratio?: Database["public"]["Enums"]["aspect_ratio"]
@@ -135,6 +136,7 @@ export type Database = {
           title: string
           updated_at?: string
           video_url?: string | null
+          website_url?: string | null
         }
         Update: {
           aspect_ratio?: Database["public"]["Enums"]["aspect_ratio"]
@@ -149,6 +151,7 @@ export type Database = {
           title?: string
           updated_at?: string
           video_url?: string | null
+          website_url?: string | null
         }
         Relationships: []
       }

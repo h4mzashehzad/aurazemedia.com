@@ -11,6 +11,7 @@ interface PortfolioItemProps {
     category: string;
     image_url: string;
     video_url?: string;
+    website_url?: string;
     is_featured: boolean;
   };
 }
@@ -91,11 +92,23 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
 
   const shouldShowVideo = isVideoFile(item.image_url);
 
+  const handleItemClick = (e: React.MouseEvent) => {
+    // Don't navigate if clicking the maximize button
+    if ((e.target as HTMLElement).closest('button')) {
+      return;
+    }
+    
+    if (item.website_url) {
+      window.open(item.website_url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <>
       <div
         ref={containerRef}
-        className="group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid"
+        className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid ${item.website_url ? 'cursor-pointer' : ''}`}
+        onClick={handleItemClick}
       >
         {/* Maximize button */}
         <Button
@@ -128,6 +141,11 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
               </Badge>
               {item.is_featured && (
                 <Badge className="bg-white text-black text-xs">Featured</Badge>
+              )}
+              {item.website_url && (
+                <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400 text-xs">
+                  Link
+                </Badge>
               )}
             </div>
             <h3 className={`${textSize} font-bold text-white mb-1`}>{item.title}</h3>
@@ -170,6 +188,11 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
                 </Badge>
                 {item.is_featured && (
                   <Badge className="bg-white text-black">Featured</Badge>
+                )}
+                {item.website_url && (
+                  <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400">
+                    Link
+                  </Badge>
                 )}
               </div>
               <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>
