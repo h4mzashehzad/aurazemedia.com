@@ -1,8 +1,7 @@
-
 import { useState, useRef, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Maximize, X } from "lucide-react";
+import { Maximize, X, Play } from "lucide-react";
 
 interface PortfolioItemProps {
   item: {
@@ -11,6 +10,7 @@ interface PortfolioItemProps {
     caption: string;
     category: string;
     image_url: string;
+    video_url?: string;
     is_featured: boolean;
   };
 }
@@ -18,12 +18,47 @@ interface PortfolioItemProps {
 export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [textSize, setTextSize] = useState('text-xl');
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [maximizedVideoLoaded, setMaximizedVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maximizedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const isVideoFile = (url: string) => {
-    return url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg') || url.includes('video');
+    return url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg');
+  };
+
+  const isVideoURL = (url: string) => {
+    return url.includes('youtube') || url.includes('youtu.be') || 
+           url.includes('vimeo') || url.includes('drive.google') ||
+           url.includes('dropbox') || url.includes('video');
+  };
+
+  const getVideoEmbedUrl = (url: string) => {
+    // YouTube
+    if (url.includes('youtube.com/watch')) {
+      const videoId = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.includes('youtu.be/')) {
+      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${videoId}`;
+    }
+    
+    // Vimeo
+    if (url.includes('vimeo.com/')) {
+      const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
+      return `https://player.vimeo.com/video/${videoId}`;
+    }
+    
+    // Google Drive
+    if (url.includes('drive.google.com')) {
+      const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
+      return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+    
+    // For other video URLs, return as-is
+    return url;
   };
 
   // Calculate text size based on container dimensions
@@ -64,7 +99,73 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     if (maximizedVideoRef.current) {
       maximizedVideoRef.current.pause();
     }
+    setMaximizedVideoLoaded(false);
   };
+
+  const handlePlayVideo = (isMaximizedView = false) => {
+    if (isMaximizedView) {
+      setMaximizedVideoLoaded(true);
+    } else {
+      setVideoLoaded(true);
+    }
+  };
+
+  const renderVideoContent = (isMaximizedView = false, showControls = false) => {
+    const hasVideoUrl = item.video_url && item.video_url.trim() !== '';
+    const videoUrl = hasVideoUrl ? item.video_url : item.image_url;
+    const loaded = isMaximizedView ? maximizedVideoLoaded : videoLoaded;
+
+    if (!loaded) {
+      return (
+        <div className="relative w-full h-full bg-black flex items-center justify-center">
+          <img
+            src={item.image_url}
+            alt={item.title}
+            className="w-full h-full object-cover opacity-50"
+          />
+          <Button
+            onClick={() => handlePlayVideo(isMaximizedView)}
+            variant="secondary"
+            size="lg"
+            className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black border-none flex items-center justify-center"
+          >
+            <Play className="w-8 h-8 ml-1" />
+          </Button>
+        </div>
+      );
+    }
+
+    if (isVideoFile(videoUrl!)) {
+      return (
+        <video
+          ref={isMaximizedView ? maximizedVideoRef : videoRef}
+          src={videoUrl}
+          className={`w-full h-full object-cover ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-110' : ''}`}
+          controls={showControls}
+          autoPlay={loaded}
+          loop={!showControls}
+          muted={!showControls}
+          playsInline
+        />
+      );
+    } else if (isVideoURL(videoUrl!) || hasVideoUrl) {
+      return (
+        <iframe
+          src={getVideoEmbedUrl(videoUrl!)}
+          className="w-full h-full"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      );
+    }
+
+    return null;
+  };
+
+  const hasVideo = (item.video_url && item.video_url.trim() !== '') || 
+                   isVideoFile(item.image_url) || 
+                   isVideoURL(item.image_url);
 
   return (
     <>
@@ -82,16 +183,8 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
           <Maximize className="w-4 h-4" />
         </Button>
 
-        {isVideoFile(item.image_url) ? (
-          <video
-            ref={videoRef}
-            src={item.image_url}
-            className="w-full object-cover transition-transform duration-500 group-hover:scale-110"
-            muted
-            autoPlay
-            loop
-            playsInline
-          />
+        {hasVideo ? (
+          renderVideoContent(false, false)
         ) : (
           <img
             src={item.image_url}
@@ -132,15 +225,10 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
               <X className="w-4 h-4" />
             </Button>
             
-            {isVideoFile(item.image_url) ? (
-              <video
-                ref={maximizedVideoRef}
-                src={item.image_url}
-                className="max-w-full max-h-full object-contain"
-                controls
-                autoPlay
-                playsInline
-              />
+            {hasVideo ? (
+              <div className="max-w-full max-h-full">
+                {renderVideoContent(true, true)}
+              </div>
             ) : (
               <img
                 src={item.image_url}
