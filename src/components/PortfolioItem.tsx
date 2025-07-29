@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Maximize, X, Play } from "lucide-react";
+import { Maximize, X } from "lucide-react";
 
 interface PortfolioItemProps {
   item: {
@@ -18,8 +18,6 @@ interface PortfolioItemProps {
 export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [textSize, setTextSize] = useState('text-xl');
-  const [videoLoaded, setVideoLoaded] = useState(false);
-  const [maximizedVideoLoaded, setMaximizedVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maximizedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -28,40 +26,6 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     return url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg');
   };
 
-  const isVideoURL = (url: string) => {
-    return url.includes('youtube') || url.includes('youtu.be') || 
-           url.includes('vimeo') || url.includes('drive.google') ||
-           url.includes('dropbox') || url.includes('video');
-  };
-
-  const getVideoEmbedUrl = (url: string) => {
-    if (!url) return '';
-    
-    // YouTube
-    if (url.includes('youtube.com/watch')) {
-      const videoId = url.split('v=')[1]?.split('&')[0];
-      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
-    }
-    if (url.includes('youtu.be/')) {
-      const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
-    }
-    
-    // Vimeo
-    if (url.includes('vimeo.com/')) {
-      const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
-      return videoId ? `https://player.vimeo.com/video/${videoId}?autoplay=1` : url;
-    }
-    
-    // Google Drive
-    if (url.includes('drive.google.com')) {
-      const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
-      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
-    }
-    
-    // For other video URLs, return as-is
-    return url;
-  };
 
   // Calculate text size based on container dimensions
   useEffect(() => {
@@ -101,100 +65,31 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     if (maximizedVideoRef.current) {
       maximizedVideoRef.current.pause();
     }
-    setMaximizedVideoLoaded(false);
-  };
-
-  const handlePlayVideo = (isMaximizedView = false) => {
-    if (isMaximizedView) {
-      setMaximizedVideoLoaded(true);
-    } else {
-      setVideoLoaded(true);
-    }
   };
 
   const renderVideoContent = (isMaximizedView = false, showControls = false) => {
-    const hasVideoUrl = item.video_url && item.video_url.trim() !== '';
-    const videoUrl = hasVideoUrl ? item.video_url : item.image_url;
-    const loaded = isMaximizedView ? maximizedVideoLoaded : videoLoaded;
-
-    if (!loaded) {
-      return (
-        <div className="relative w-full h-full bg-black flex items-center justify-center min-h-[200px]">
-          <img
-            src={item.image_url}
-            alt={item.title}
-            className="w-full h-full object-cover opacity-50"
-          />
-          <Button
-            onClick={(e) => {
-              e.stopPropagation();
-              handlePlayVideo(isMaximizedView);
-            }}
-            variant="secondary"
-            size="sm"
-            className="absolute w-12 h-12 rounded-full bg-white/90 hover:bg-white text-black border-none flex items-center justify-center shadow-lg"
-          >
-            <Play className="w-5 h-5 ml-0.5" />
-          </Button>
-        </div>
-      );
-    }
-
-    if (isVideoFile(videoUrl!)) {
+    if (isVideoFile(item.image_url)) {
       return (
         <video
           ref={isMaximizedView ? maximizedVideoRef : videoRef}
-          src={videoUrl}
+          src={item.image_url}
           className={`w-full h-full object-cover ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-110' : ''}`}
           controls={showControls}
-          autoPlay={loaded}
+          autoPlay
           loop={!showControls}
           muted={!showControls}
           playsInline
           onError={(e) => {
             console.error('Video error:', e);
-            // Fallback to image if video fails
-            if (isMaximizedView) {
-              setMaximizedVideoLoaded(false);
-            } else {
-              setVideoLoaded(false);
-            }
           }}
         />
-      );
-    } else if (isVideoURL(videoUrl!) || hasVideoUrl) {
-      return (
-        <div className="w-full h-full">
-          <iframe
-            src={getVideoEmbedUrl(videoUrl!)}
-            className="w-full h-full min-h-[200px]"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            loading="lazy"
-            onError={() => {
-              console.error('Iframe error');
-              // Fallback to image if iframe fails
-              if (isMaximizedView) {
-                setMaximizedVideoLoaded(false);
-              } else {
-                setVideoLoaded(false);
-              }
-            }}
-          />
-        </div>
       );
     }
 
     return null;
   };
 
-  const hasVideo = (item.video_url && item.video_url.trim() !== '') || 
-                   isVideoFile(item.image_url) || 
-                   isVideoURL(item.image_url);
-
-  // Only consider it a video if we have a valid video URL or the image_url is a video file
-  const shouldShowVideo = hasVideo && (item.video_url?.trim() || isVideoFile(item.image_url));
+  const shouldShowVideo = isVideoFile(item.image_url);
 
   return (
     <>

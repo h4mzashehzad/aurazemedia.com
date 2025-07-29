@@ -38,7 +38,6 @@ export const PortfolioManager = () => {
     title: '',
     category: '',
     image_url: '',
-    video_url: '',
     caption: '',
     aspect_ratio: 'square' as AspectRatioType,
     tags: '',
@@ -189,7 +188,6 @@ export const PortfolioManager = () => {
       title: '',
       category: categories?.[0] || '',
       image_url: '',
-      video_url: '',
       caption: '',
       aspect_ratio: 'square',
       tags: '',
@@ -244,7 +242,6 @@ export const PortfolioManager = () => {
       title: item.title,
       category: item.category,
       image_url: item.image_url,
-      video_url: item.video_url || '',
       caption: item.caption,
       aspect_ratio: item.aspect_ratio,
       tags: item.tags?.join(', ') || '',
@@ -354,20 +351,12 @@ export const PortfolioManager = () => {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Image URL (e.g., https://example.com/image.jpg)"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      className="bg-gray-800 border-gray-600"
-                    />
-                    <Input
-                      placeholder="Video URL (YouTube, Google Drive, Vimeo, etc.) - Optional"
-                      value={formData.video_url}
-                      onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
-                      className="bg-gray-800 border-gray-600"
-                    />
-                  </div>
+                  <Input
+                    placeholder="Image/Video URL (e.g., https://example.com/image.jpg or video.mp4)"
+                    value={formData.image_url}
+                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                    className="bg-gray-800 border-gray-600"
+                  />
                 )}
               </div>
 
