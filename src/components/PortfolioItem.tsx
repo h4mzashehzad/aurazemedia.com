@@ -35,26 +35,28 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   };
 
   const getVideoEmbedUrl = (url: string) => {
+    if (!url) return '';
+    
     // YouTube
     if (url.includes('youtube.com/watch')) {
       const videoId = url.split('v=')[1]?.split('&')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
     }
     if (url.includes('youtu.be/')) {
       const videoId = url.split('youtu.be/')[1]?.split('?')[0];
-      return `https://www.youtube.com/embed/${videoId}`;
+      return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1` : url;
     }
     
     // Vimeo
     if (url.includes('vimeo.com/')) {
       const videoId = url.split('vimeo.com/')[1]?.split('?')[0];
-      return `https://player.vimeo.com/video/${videoId}`;
+      return videoId ? `https://player.vimeo.com/video/${videoId}?autoplay=1` : url;
     }
     
     // Google Drive
     if (url.includes('drive.google.com')) {
       const fileId = url.split('/d/')[1]?.split('/')[0] || url.split('id=')[1]?.split('&')[0];
-      return `https://drive.google.com/file/d/${fileId}/preview`;
+      return fileId ? `https://drive.google.com/file/d/${fileId}/preview` : url;
     }
     
     // For other video URLs, return as-is
@@ -117,19 +119,22 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
 
     if (!loaded) {
       return (
-        <div className="relative w-full h-full bg-black flex items-center justify-center">
+        <div className="relative w-full h-full bg-black flex items-center justify-center min-h-[200px]">
           <img
             src={item.image_url}
             alt={item.title}
             className="w-full h-full object-cover opacity-50"
           />
           <Button
-            onClick={() => handlePlayVideo(isMaximizedView)}
+            onClick={(e) => {
+              e.stopPropagation();
+              handlePlayVideo(isMaximizedView);
+            }}
             variant="secondary"
-            size="lg"
-            className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black border-none flex items-center justify-center"
+            size="sm"
+            className="absolute w-12 h-12 rounded-full bg-white/90 hover:bg-white text-black border-none flex items-center justify-center shadow-lg"
           >
-            <Play className="w-8 h-8 ml-1" />
+            <Play className="w-5 h-5 ml-0.5" />
           </Button>
         </div>
       );
@@ -146,17 +151,38 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
           loop={!showControls}
           muted={!showControls}
           playsInline
+          onError={(e) => {
+            console.error('Video error:', e);
+            // Fallback to image if video fails
+            if (isMaximizedView) {
+              setMaximizedVideoLoaded(false);
+            } else {
+              setVideoLoaded(false);
+            }
+          }}
         />
       );
     } else if (isVideoURL(videoUrl!) || hasVideoUrl) {
       return (
-        <iframe
-          src={getVideoEmbedUrl(videoUrl!)}
-          className="w-full h-full"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="w-full h-full">
+          <iframe
+            src={getVideoEmbedUrl(videoUrl!)}
+            className="w-full h-full min-h-[200px]"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            loading="lazy"
+            onError={() => {
+              console.error('Iframe error');
+              // Fallback to image if iframe fails
+              if (isMaximizedView) {
+                setMaximizedVideoLoaded(false);
+              } else {
+                setVideoLoaded(false);
+              }
+            }}
+          />
+        </div>
       );
     }
 
@@ -166,6 +192,9 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const hasVideo = (item.video_url && item.video_url.trim() !== '') || 
                    isVideoFile(item.image_url) || 
                    isVideoURL(item.image_url);
+
+  // Only consider it a video if we have a valid video URL or the image_url is a video file
+  const shouldShowVideo = hasVideo && (item.video_url?.trim() || isVideoFile(item.image_url));
 
   return (
     <>
@@ -183,13 +212,15 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
           <Maximize className="w-4 h-4" />
         </Button>
 
-        {hasVideo ? (
-          renderVideoContent(false, false)
+        {shouldShowVideo ? (
+          <div className="w-full h-full">
+            {renderVideoContent(false, false)}
+          </div>
         ) : (
           <img
             src={item.image_url}
             alt={item.title}
-            className="w-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
         )}
         
@@ -225,8 +256,8 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
               <X className="w-4 h-4" />
             </Button>
             
-            {hasVideo ? (
-              <div className="max-w-full max-h-full">
+            {shouldShowVideo ? (
+              <div className="w-full h-full max-w-full max-h-full">
                 {renderVideoContent(true, true)}
               </div>
             ) : (
