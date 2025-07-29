@@ -11,13 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { Database } from "@/integrations/supabase/types";
 
-type ProjectCategory = Database["public"]["Enums"]["project_category"];
+// Project categories are now managed dynamically in portfolio_categories table
 
 export const Contact = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    project_type: '' as ProjectCategory | '',
+    project_type: '',
     message: ''
   });
 
@@ -167,7 +167,7 @@ export const Contact = () => {
                   </label>
                   <Select 
                     value={formData.project_type} 
-                    onValueChange={(value) => setFormData({ ...formData, project_type: value as ProjectCategory | '' })}
+                    onValueChange={(value) => setFormData({ ...formData, project_type: value })}
                   >
                     <SelectTrigger className="bg-gray-800 border-gray-600 text-white">
                       <SelectValue placeholder="Select project type" />

@@ -52,7 +52,7 @@ export type Database = {
           id: string
           message: string
           name: string
-          project_type: Database["public"]["Enums"]["project_category"] | null
+          project_type: string | null
           status: string | null
           updated_at: string
         }
@@ -63,7 +63,7 @@ export type Database = {
           id?: string
           message: string
           name: string
-          project_type?: Database["public"]["Enums"]["project_category"] | null
+          project_type?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -74,7 +74,7 @@ export type Database = {
           id?: string
           message?: string
           name?: string
-          project_type?: Database["public"]["Enums"]["project_category"] | null
+          project_type?: string | null
           status?: string | null
           updated_at?: string
         }
@@ -111,7 +111,7 @@ export type Database = {
         Row: {
           aspect_ratio: Database["public"]["Enums"]["aspect_ratio"]
           caption: string
-          category: Database["public"]["Enums"]["project_category"]
+          category: string
           created_at: string
           display_order: number | null
           id: string
@@ -124,7 +124,7 @@ export type Database = {
         Insert: {
           aspect_ratio?: Database["public"]["Enums"]["aspect_ratio"]
           caption: string
-          category: Database["public"]["Enums"]["project_category"]
+          category: string
           created_at?: string
           display_order?: number | null
           id?: string
@@ -137,7 +137,7 @@ export type Database = {
         Update: {
           aspect_ratio?: Database["public"]["Enums"]["aspect_ratio"]
           caption?: string
-          category?: Database["public"]["Enums"]["project_category"]
+          category?: string
           created_at?: string
           display_order?: number | null
           id?: string
@@ -289,12 +289,6 @@ export type Database = {
     }
     Enums: {
       aspect_ratio: "square" | "wide" | "tall"
-      project_category:
-        | "Real Estate"
-        | "Medical"
-        | "Clothing"
-        | "Food"
-        | "Construction"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -423,13 +417,6 @@ export const Constants = {
   public: {
     Enums: {
       aspect_ratio: ["square", "wide", "tall"],
-      project_category: [
-        "Real Estate",
-        "Medical",
-        "Clothing",
-        "Food",
-        "Construction",
-      ],
     },
   },
 } as const

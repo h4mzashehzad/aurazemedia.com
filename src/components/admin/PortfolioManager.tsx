@@ -13,13 +13,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Database } from '@/integrations/supabase/types';
 import { Switch } from '@/components/ui/switch';
 
-type CategoryType = Database['public']['Enums']['project_category'];
 type AspectRatioType = Database['public']['Enums']['aspect_ratio'];
 
 interface PortfolioItem {
   id: string;
   title: string;
-  category: CategoryType;
+  category: string;
   image_url: string;
   caption: string;
   aspect_ratio: AspectRatioType;
@@ -36,7 +35,7 @@ export const PortfolioManager = () => {
   const [uploading, setUploading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Real Estate' as CategoryType,
+    category: '',
     image_url: '',
     caption: '',
     aspect_ratio: 'square' as AspectRatioType,
@@ -186,7 +185,7 @@ export const PortfolioManager = () => {
   const resetForm = () => {
     setFormData({
       title: '',
-      category: 'Real Estate',
+      category: categories?.[0] || '',
       image_url: '',
       caption: '',
       aspect_ratio: 'square',
@@ -268,11 +267,11 @@ export const PortfolioManager = () => {
         return;
       }
 
-      // Check file size (10MB limit)
-      if (file.size > 10 * 1024 * 1024) {
+      // Check file size (500MB limit)
+      if (file.size > 500 * 1024 * 1024) {
         toast({
           title: "File too large",
-          description: "Please select a file smaller than 10MB",
+          description: "Please select a file smaller than 500MB",
           variant: "destructive"
         });
         return;
@@ -310,9 +309,9 @@ export const PortfolioManager = () => {
                   required
                   className="bg-gray-800 border-gray-600"
                 />
-                <Select value={formData.category} onValueChange={(value: CategoryType) => setFormData({ ...formData, category: value })}>
+                <Select value={formData.category} onValueChange={(value: string) => setFormData({ ...formData, category: value })}>
                   <SelectTrigger className="bg-gray-800 border-gray-600">
-                    <SelectValue />
+                    <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
                     {categories?.map((category) => (
@@ -349,7 +348,7 @@ export const PortfolioManager = () => {
                       </div>
                     )}
                     <p className="text-xs text-gray-500">
-                      Supported: Images (JPEG, PNG, GIF) and Videos (MP4, WebM, OGG). Max size: 10MB
+                      Supported: Images (JPEG, PNG, GIF) and Videos (MP4, WebM, OGG). Max size: 500MB
                     </p>
                   </div>
                 ) : (
