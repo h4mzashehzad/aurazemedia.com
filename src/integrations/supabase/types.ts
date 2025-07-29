@@ -160,6 +160,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_popular: boolean | null
+          is_visible: boolean | null
           name: string
           price: string
           updated_at: string
@@ -171,6 +172,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_popular?: boolean | null
+          is_visible?: boolean | null
           name: string
           price: string
           updated_at?: string
@@ -182,6 +184,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_popular?: boolean | null
+          is_visible?: boolean | null
           name?: string
           price?: string
           updated_at?: string

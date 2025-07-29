@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
-import { Save, Settings } from 'lucide-react';
+import { Save, Settings, Eye } from 'lucide-react';
 
 interface WebsiteSettings {
   id: string;
@@ -31,6 +32,7 @@ export const SettingsManager = () => {
     email: '',
     address: ''
   });
+  const [pricingSectionVisible, setPricingSectionVisible] = useState(true);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -49,6 +51,20 @@ export const SettingsManager = () => {
     }
   });
 
+  const { data: pricingVisibility } = useQuery({
+    queryKey: ['admin-pricing-visibility'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('website_settings')
+        .select('value')
+        .eq('key', 'pricing_section_visible')
+        .single();
+      
+      if (error) return true; // Default to visible
+      return data.value === true || data.value === 'true';
+    }
+  });
+
   // Update form data when settings are loaded
   useEffect(() => {
     if (settings?.value) {
@@ -61,6 +77,12 @@ export const SettingsManager = () => {
       });
     }
   }, [settings]);
+
+  useEffect(() => {
+    if (pricingVisibility !== undefined) {
+      setPricingSectionVisible(pricingVisibility);
+    }
+  }, [pricingVisibility]);
 
   const updateMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
@@ -93,9 +115,33 @@ export const SettingsManager = () => {
     }
   });
 
+  const updateVisibilityMutation = useMutation({
+    mutationFn: async (visible: boolean) => {
+      const { error } = await supabase
+        .from('website_settings')
+        .upsert({ key: 'pricing_section_visible', value: visible })
+        .eq('key', 'pricing_section_visible');
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-pricing-visibility'] });
+      queryClient.invalidateQueries({ queryKey: ['pricing-visibility'] });
+      toast({ title: "Pricing section visibility updated" });
+    },
+    onError: (error) => {
+      toast({ title: "Error updating visibility", description: error.message, variant: "destructive" });
+    }
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateMutation.mutate(formData);
+  };
+
+  const handleVisibilityChange = (visible: boolean) => {
+    setPricingSectionVisible(visible);
+    updateVisibilityMutation.mutate(visible);
   };
 
   if (isLoading) {
@@ -106,6 +152,30 @@ export const SettingsManager = () => {
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">Website Settings</h2>
 
+      {/* Section Visibility Controls */}
+      <Card className="bg-gray-900 border-gray-700">
+        <CardHeader>
+          <CardTitle className="text-white flex items-center gap-2">
+            <Eye className="w-5 h-5" />
+            Section Visibility
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-white font-medium">Pricing Section</label>
+              <p className="text-gray-400 text-sm">Show or hide the entire pricing section on the website</p>
+            </div>
+            <Switch
+              checked={pricingSectionVisible}
+              onCheckedChange={handleVisibilityChange}
+              disabled={updateVisibilityMutation.isPending}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Site Configuration */}
       <Card className="bg-gray-900 border-gray-700">
         <CardHeader>
           <CardTitle className="text-white flex items-center gap-2">

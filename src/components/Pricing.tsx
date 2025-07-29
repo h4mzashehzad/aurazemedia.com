@@ -7,6 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { Check } from "lucide-react";
 
 export const Pricing = () => {
+  const { data: pricingVisibility } = useQuery({
+    queryKey: ['pricing-visibility'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('website_settings')
+        .select('value')
+        .eq('key', 'pricing_section_visible')
+        .single();
+      
+      if (error) return true; // Default to visible if setting doesn't exist
+      return data.value === true || data.value === 'true';
+    }
+  });
+
   const { data: pricingPackages, isLoading } = useQuery({
     queryKey: ['pricing-packages'],
     queryFn: async () => {
@@ -14,6 +28,7 @@ export const Pricing = () => {
         .from('pricing_packages')
         .select('*')
         .eq('is_active', true)
+        .eq('is_visible', true)
         .order('display_order', { ascending: true });
       
       if (error) throw error;
@@ -24,6 +39,11 @@ export const Pricing = () => {
   const scrollToContact = () => {
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Don't render the pricing section if it's hidden
+  if (pricingVisibility === false) {
+    return null;
+  }
 
   if (isLoading) {
     return (

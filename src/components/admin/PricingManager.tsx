@@ -18,6 +18,7 @@ interface PricingPackage {
   features: string[];
   is_popular: boolean;
   is_active: boolean;
+  is_visible: boolean;
   display_order: number;
 }
 
@@ -30,6 +31,7 @@ export const PricingManager = () => {
     features: '',
     is_popular: false,
     is_active: true,
+    is_visible: true,
     display_order: 0
   });
 
@@ -120,6 +122,7 @@ export const PricingManager = () => {
       features: '',
       is_popular: false,
       is_active: true,
+      is_visible: true,
       display_order: 0
     });
     setEditingPackage(null);
@@ -152,6 +155,7 @@ export const PricingManager = () => {
       features: pkg.features.join('\n'),
       is_popular: pkg.is_popular,
       is_active: pkg.is_active,
+      is_visible: pkg.is_visible,
       display_order: pkg.display_order
     });
     setDialogOpen(true);
@@ -201,7 +205,7 @@ export const PricingManager = () => {
                 rows={6}
                 className="bg-gray-800 border-gray-600"
               />
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-4 gap-4">
                 <Input
                   type="number"
                   placeholder="Display Order"
@@ -229,6 +233,16 @@ export const PricingManager = () => {
                   />
                   <label htmlFor="active" className="text-sm">Active</label>
                 </div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="visible"
+                    checked={formData.is_visible}
+                    onChange={(e) => setFormData({ ...formData, is_visible: e.target.checked })}
+                    className="rounded"
+                  />
+                  <label htmlFor="visible" className="text-sm">Visible</label>
+                </div>
               </div>
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={resetForm}>
@@ -255,6 +269,9 @@ export const PricingManager = () => {
                     {pkg.is_popular && <Star className="w-4 h-4 text-yellow-500" />}
                     <span className={`text-xs px-2 py-1 rounded ${pkg.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                       {pkg.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                    <span className={`text-xs px-2 py-1 rounded ${pkg.is_visible ? 'bg-blue-500/20 text-blue-400' : 'bg-gray-500/20 text-gray-400'}`}>
+                      {pkg.is_visible ? 'Visible' : 'Hidden'}
                     </span>
                   </div>
                 </div>
