@@ -1,5 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -20,10 +22,50 @@ interface AdminDashboardProps {
 export const AdminDashboard = ({ admin, onLogout }: AdminDashboardProps) => {
   const [activeTab, setActiveTab] = useState('portfolio');
 
+  // Fetch admin role
+  const { data: adminRole, isLoading } = useQuery({
+    queryKey: ['admin-role', admin.id],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_admin_role', {
+        _admin_id: admin.id
+      });
+      
+      if (error) throw error;
+      return data as string;
+    }
+  });
+
   const handleLogout = () => {
     localStorage.removeItem('admin_user');
     onLogout();
   };
+
+  // Define what tabs each role can access
+  const getAvailableTabs = (role: string) => {
+    if (role === 'super_admin') {
+      return ['portfolio', 'categories', 'team', 'pricing', 'contact', 'settings'];
+    } else if (role === 'portfolio_admin') {
+      return ['portfolio', 'categories'];
+    }
+    return ['portfolio']; // Default fallback
+  };
+
+  const availableTabs = adminRole ? getAvailableTabs(adminRole) : ['portfolio'];
+
+  // Ensure active tab is available to current role
+  useEffect(() => {
+    if (adminRole && !availableTabs.includes(activeTab)) {
+      setActiveTab('portfolio');
+    }
+  }, [adminRole, availableTabs, activeTab]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading admin permissions...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black">
@@ -32,7 +74,14 @@ export const AdminDashboard = ({ admin, onLogout }: AdminDashboardProps) => {
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-            <p className="text-gray-400">Welcome, {admin.full_name}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-gray-400">Welcome, {admin.full_name}</p>
+              {adminRole && (
+                <Badge variant="outline" className="text-xs">
+                  {adminRole === 'super_admin' ? 'Super Admin' : 'Portfolio Admin'}
+                </Badge>
+              )}
+            </div>
           </div>
           <Button
             onClick={handleLogout}
@@ -48,56 +97,78 @@ export const AdminDashboard = ({ admin, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-900">
-            <TabsTrigger value="portfolio" className="flex items-center gap-2">
-              <Image className="w-4 h-4" />
-              Portfolio
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4" />
-              Categories
-            </TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Team
-            </TabsTrigger>
-            <TabsTrigger value="pricing" className="flex items-center gap-2">
-              <Package className="w-4 h-4" />
-              Pricing
-            </TabsTrigger>
-            <TabsTrigger value="contact" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Contact
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
-            </TabsTrigger>
+          <TabsList className={`grid w-full bg-gray-900 ${availableTabs.length === 2 ? 'grid-cols-2' : 'grid-cols-6'}`}>
+            {availableTabs.includes('portfolio') && (
+              <TabsTrigger value="portfolio" className="flex items-center gap-2">
+                <Image className="w-4 h-4" />
+                Portfolio
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('categories') && (
+              <TabsTrigger value="categories" className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
+                Categories
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('team') && (
+              <TabsTrigger value="team" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Team
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('pricing') && (
+              <TabsTrigger value="pricing" className="flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Pricing
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('contact') && (
+              <TabsTrigger value="contact" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Contact
+              </TabsTrigger>
+            )}
+            {availableTabs.includes('settings') && (
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="portfolio">
             <PortfolioManager />
           </TabsContent>
 
-          <TabsContent value="categories">
-            <CategoryManager />
-          </TabsContent>
+          {availableTabs.includes('categories') && (
+            <TabsContent value="categories">
+              <CategoryManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="team">
-            <TeamManager />
-          </TabsContent>
+          {availableTabs.includes('team') && (
+            <TabsContent value="team">
+              <TeamManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="pricing">
-            <PricingManager />
-          </TabsContent>
+          {availableTabs.includes('pricing') && (
+            <TabsContent value="pricing">
+              <PricingManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="contact">
-            <ContactManager />
-          </TabsContent>
+          {availableTabs.includes('contact') && (
+            <TabsContent value="contact">
+              <ContactManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="settings">
-            <SettingsManager />
-          </TabsContent>
+          {availableTabs.includes('settings') && (
+            <TabsContent value="settings">
+              <SettingsManager />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>

@@ -22,6 +22,7 @@ export type Database = {
           id: string
           is_active: boolean
           password_hash: string
+          role: Database["public"]["Enums"]["admin_role"] | null
           updated_at: string
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           password_hash: string
+          role?: Database["public"]["Enums"]["admin_role"] | null
           updated_at?: string
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           password_hash?: string
+          role?: Database["public"]["Enums"]["admin_role"] | null
           updated_at?: string
         }
         Relationships: []
@@ -287,6 +290,17 @@ export type Database = {
         Args: { p_email: string; p_password: string; p_full_name: string }
         Returns: string
       }
+      get_admin_role: {
+        Args: { _admin_id: string }
+        Returns: Database["public"]["Enums"]["admin_role"]
+      }
+      has_admin_role: {
+        Args: {
+          _admin_id: string
+          _role: Database["public"]["Enums"]["admin_role"]
+        }
+        Returns: boolean
+      }
       verify_admin_login: {
         Args: { p_email: string; p_password: string }
         Returns: {
@@ -297,6 +311,7 @@ export type Database = {
       }
     }
     Enums: {
+      admin_role: "super_admin" | "portfolio_admin"
       aspect_ratio: "square" | "wide" | "tall"
     }
     CompositeTypes: {
@@ -425,6 +440,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: ["super_admin", "portfolio_admin"],
       aspect_ratio: ["square", "wide", "tall"],
     },
   },
