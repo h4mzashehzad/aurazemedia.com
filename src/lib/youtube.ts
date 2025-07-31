@@ -49,7 +49,7 @@ export const getYouTubeEmbedUrl = (url: string): string | null => {
   const videoId = extractYouTubeVideoId(url);
   if (!videoId) return null;
   
-  return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+  return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&mute=1`;
 };
 
 /**

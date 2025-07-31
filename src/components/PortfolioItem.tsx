@@ -76,7 +76,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
       return (
         <iframe
           src={`${youtubeEmbedUrl}${showControls ? '&autoplay=0' : '&autoplay=0'}`}
-          className={`w-full h-full ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-110' : ''}`}
+          className={`w-full h-full rounded-lg ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-105' : ''}`}
           frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
@@ -124,7 +124,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     <>
       <div
         ref={containerRef}
-        className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid ${item.website_url ? 'cursor-pointer' : ''}`}
+        className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid ${item.website_url ? 'cursor-pointer' : ''} ${isYouTube ? 'bg-gradient-to-br from-red-900/20 to-black/40 border border-red-500/20' : ''}`}
         onClick={handleItemClick}
       >
         {/* Maximize button - hidden for YouTube videos */}
@@ -178,7 +178,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
       {/* Maximized view modal */}
       {isMaximized && (
         <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="relative max-w-7xl max-h-full">
+          <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] flex flex-col">
             <Button
               onClick={handleCloseMaximized}
               variant="secondary"
@@ -189,33 +189,35 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
             </Button>
             
             {shouldShowMedia ? (
-              <div className="w-full h-full max-w-full max-h-full">
+              <div className="flex-1 w-full h-full min-h-0">
                 {renderMediaContent(true, true)}
               </div>
             ) : (
-              <img
-                src={displayImageUrl}
-                alt={item.title}
-                className="max-w-full max-h-full object-contain"
-              />
+              <div className="flex-1 flex items-center justify-center min-h-0">
+                <img
+                  src={displayImageUrl}
+                  alt={item.title}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
             )}
             
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge variant="secondary" className="bg-white/20 text-white">
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 sm:p-6 max-h-[30vh] overflow-y-auto">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <Badge variant="secondary" className="bg-white/20 text-white text-xs sm:text-sm">
                   {item.category}
                 </Badge>
                 {item.is_featured && (
-                  <Badge className="bg-white text-black">Featured</Badge>
+                  <Badge className="bg-white text-black text-xs sm:text-sm">Featured</Badge>
                 )}
                 {item.website_url && (
-                  <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400">
+                  <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400 text-xs sm:text-sm">
                     Link
                   </Badge>
                 )}
               </div>
-              <h3 className="text-2xl font-bold text-white mb-2">{item.title}</h3>
-              <p className="text-gray-200">{item.caption}</p>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 line-clamp-2">{item.title}</h3>
+              <p className="text-gray-200 text-sm sm:text-base line-clamp-3">{item.caption}</p>
             </div>
           </div>
         </div>
