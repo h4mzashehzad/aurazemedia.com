@@ -12,6 +12,7 @@ import { Plus, Edit, Trash2, Star, Upload, Link } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Database } from '@/integrations/supabase/types';
 import { Switch } from '@/components/ui/switch';
+import { getMediaType, isYouTubeUrl, getYouTubeThumbnail } from '@/lib/youtube';
 
 type AspectRatioType = Database['public']['Enums']['aspect_ratio'];
 
@@ -355,12 +356,30 @@ export const PortfolioManager = () => {
                     </p>
                   </div>
                 ) : (
-                  <Input
-                    placeholder="Image/Video URL (e.g., https://example.com/image.jpg or video.mp4)"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                    className="bg-gray-800 border-gray-600"
-                  />
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Image/Video/YouTube URL (e.g., https://youtube.com/watch?v=... or image.jpg)"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      className="bg-gray-800 border-gray-600"
+                    />
+                    {formData.image_url && (
+                      <div className="text-xs text-gray-400">
+                        {isYouTubeUrl(formData.image_url) && (
+                          <span className="text-green-400">✓ Valid YouTube URL detected</span>
+                        )}
+                        {getMediaType(formData.image_url) === 'video' && (
+                          <span className="text-blue-400">✓ Video file detected</span>
+                        )}
+                        {getMediaType(formData.image_url) === 'image' && !isYouTubeUrl(formData.image_url) && (
+                          <span className="text-purple-400">✓ Image URL detected</span>
+                        )}
+                      </div>
+                    )}
+                    <p className="text-xs text-gray-500">
+                      Supported: Images (JPG, PNG, GIF), Videos (MP4, WebM, OGG), and YouTube URLs
+                    </p>
+                  </div>
                 )}
               </div>
 
@@ -453,11 +472,34 @@ export const PortfolioManager = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {item.image_url.includes('video') || item.image_url.endsWith('.mp4') || item.image_url.endsWith('.webm') || item.image_url.endsWith('.ogg') ? (
-                <video src={item.image_url} className="w-full h-32 object-cover rounded mb-2" controls />
-              ) : (
-                <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover rounded mb-2" />
-              )}
+              {(() => {
+                const mediaType = getMediaType(item.image_url);
+                if (mediaType === 'youtube') {
+                  const thumbnail = getYouTubeThumbnail(item.image_url);
+                  return (
+                    <div className="relative">
+                      <img 
+                        src={thumbnail || item.image_url} 
+                        alt={item.title} 
+                        className="w-full h-32 object-cover rounded mb-2" 
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 rounded mb-2">
+                        <div className="bg-red-600 text-white px-2 py-1 rounded text-xs font-semibold">
+                          YouTube
+                        </div>
+                      </div>
+                    </div>
+                  );
+                } else if (mediaType === 'video') {
+                  return (
+                    <video src={item.image_url} className="w-full h-32 object-cover rounded mb-2" controls />
+                  );
+                } else {
+                  return (
+                    <img src={item.image_url} alt={item.title} className="w-full h-32 object-cover rounded mb-2" />
+                  );
+                }
+              })()}
               <p className="text-gray-400 text-sm mb-2">{item.caption}</p>
               {item.website_url && (
                 <div className="mb-2">

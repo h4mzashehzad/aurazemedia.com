@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Maximize, X } from "lucide-react";
+import { getMediaType, getYouTubeEmbedUrl, getYouTubeThumbnail, isVideoFile } from "@/lib/youtube";
 
 interface PortfolioItemProps {
   item: {
@@ -23,9 +24,11 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const maximizedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const isVideoFile = (url: string) => {
-    return url.includes('.mp4') || url.includes('.webm') || url.includes('.ogg');
-  };
+  const mediaType = getMediaType(item.image_url);
+  const isYouTube = mediaType === 'youtube';
+  const isVideo = mediaType === 'video';
+  const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(item.image_url) : null;
+  const youtubeThumbnail = isYouTube ? getYouTubeThumbnail(item.image_url) : null;
 
 
   // Calculate text size based on container dimensions
@@ -68,8 +71,21 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     }
   };
 
-  const renderVideoContent = (isMaximizedView = false, showControls = false) => {
-    if (isVideoFile(item.image_url)) {
+  const renderMediaContent = (isMaximizedView = false, showControls = false) => {
+    if (isYouTube && youtubeEmbedUrl) {
+      return (
+        <iframe
+          src={`${youtubeEmbedUrl}${showControls ? '&autoplay=0' : '&autoplay=0'}`}
+          className={`w-full h-full ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-110' : ''}`}
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          title={item.title}
+        />
+      );
+    }
+    
+    if (isVideo) {
       return (
         <video
           ref={isMaximizedView ? maximizedVideoRef : videoRef}
@@ -90,7 +106,8 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     return null;
   };
 
-  const shouldShowVideo = isVideoFile(item.image_url);
+  const shouldShowMedia = isYouTube || isVideo;
+  const displayImageUrl = isYouTube && youtubeThumbnail ? youtubeThumbnail : item.image_url;
 
   const handleItemClick = (e: React.MouseEvent) => {
     // Don't navigate if clicking the maximize button
@@ -110,31 +127,33 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
         className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid ${item.website_url ? 'cursor-pointer' : ''}`}
         onClick={handleItemClick}
       >
-        {/* Maximize button */}
-        <Button
-          onClick={handleMaximize}
-          variant="secondary"
-          size="sm"
-          className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 hover:bg-black/70 text-white border-none"
-        >
-          <Maximize className="w-4 h-4" />
-        </Button>
+        {/* Maximize button - hidden for YouTube videos */}
+        {!isYouTube && (
+          <Button
+            onClick={handleMaximize}
+            variant="secondary"
+            size="sm"
+            className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 hover:bg-black/70 text-white border-none"
+          >
+            <Maximize className="w-4 h-4" />
+          </Button>
+        )}
 
-        {shouldShowVideo ? (
+        {shouldShowMedia ? (
           <div className="w-full h-full">
-            {renderVideoContent(false, false)}
+            {renderMediaContent(false, false)}
           </div>
         ) : (
           <img
-            src={item.image_url}
+            src={displayImageUrl}
             alt={item.title}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
           />
         )}
         
-        {/* Content overlay - pointer-events-none to allow video clicks */}
+        {/* Content overlay - positioned to not interfere with video playback */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-          <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-auto">
+          <div className="absolute bottom-0 left-0 right-0 p-4 pointer-events-none">
             <div className="flex items-center gap-2 mb-2">
               <Badge variant="secondary" className="bg-white/20 text-white text-xs">
                 {item.category}
@@ -169,13 +188,13 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
               <X className="w-4 h-4" />
             </Button>
             
-            {shouldShowVideo ? (
+            {shouldShowMedia ? (
               <div className="w-full h-full max-w-full max-h-full">
-                {renderVideoContent(true, true)}
+                {renderMediaContent(true, true)}
               </div>
             ) : (
               <img
-                src={item.image_url}
+                src={displayImageUrl}
                 alt={item.title}
                 className="max-w-full max-h-full object-contain"
               />
