@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Maximize, X } from "lucide-react";
+import { Play, X } from "lucide-react";
 import { getMediaType, getYouTubeEmbedUrl, getYouTubeThumbnail, isVideoFile } from "@/lib/youtube";
 
 interface PortfolioItemProps {
@@ -12,6 +12,7 @@ interface PortfolioItemProps {
     category: string;
     image_url: string;
     video_url?: string;
+    thumbnail_url?: string;
     website_url?: string;
     is_featured: boolean;
   };
@@ -20,15 +21,29 @@ interface PortfolioItemProps {
 export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
   const [textSize, setTextSize] = useState('text-xl');
+  const [isHovering, setIsHovering] = useState(false);
+  const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maximizedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const mediaType = getMediaType(item.image_url);
   const isYouTube = mediaType === 'youtube';
   const isVideo = mediaType === 'video';
   const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(item.image_url) : null;
   const youtubeThumbnail = isYouTube ? getYouTubeThumbnail(item.image_url) : null;
+
+  // Set thumbnail - only use custom thumbnail_url for MP4 videos
+  useEffect(() => {
+    if (isVideo && item.thumbnail_url) {
+      // Use custom thumbnail if provided for MP4 videos
+      setVideoThumbnail(item.thumbnail_url);
+    } else if (isVideo) {
+      // No custom thumbnail for MP4 - will show black screen with play button
+      setVideoThumbnail(null);
+    }
+  }, [isVideo, item.thumbnail_url]);
 
 
   // Calculate text size based on container dimensions
@@ -59,48 +74,108 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     return () => resizeObserver.disconnect();
   }, []);
 
-  const handleMaximize = (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleMaximize = () => {
     setIsMaximized(true);
   };
 
-  const handleCloseMaximized = () => {
+  const handleCloseMaximized = (e: React.MouseEvent) => {
+    // Close when clicking outside the media content
     setIsMaximized(false);
     if (maximizedVideoRef.current) {
       maximizedVideoRef.current.pause();
+    }
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+  };
+
+  const handleVideoHover = (isHovering: boolean) => {
+    setIsHovering(isHovering);
+    if (videoRef.current) {
+      if (isHovering) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+        videoRef.current.currentTime = 0;
+      }
     }
   };
 
   const renderMediaContent = (isMaximizedView = false, showControls = false) => {
     if (isYouTube && youtubeEmbedUrl) {
       return (
-        <iframe
-          src={`${youtubeEmbedUrl}${showControls ? '&autoplay=0' : '&autoplay=0'}`}
-          className={`w-full h-full rounded-lg ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-105' : ''}`}
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          title={item.title}
-        />
+        <div className="relative w-full h-full">
+          <iframe
+            src={`${youtubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}`}
+            className={`w-full h-full rounded-lg ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-105' : ''}`}
+            frameBorder="0"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+            title={item.title}
+          />
+        </div>
       );
     }
     
     if (isVideo) {
-      return (
-        <video
-          ref={isMaximizedView ? maximizedVideoRef : videoRef}
-          src={item.image_url}
-          className={`w-full h-full object-cover ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-110' : ''}`}
-          controls={showControls}
-          autoPlay
-          loop={!showControls}
-          muted={!showControls}
-          playsInline
-          onError={(e) => {
-            console.error('Video error:', e);
-          }}
-        />
-      );
+      if (!isMaximizedView) {
+        return (
+          <div 
+            className="relative w-full h-full"
+            onMouseEnter={() => handleVideoHover(true)}
+            onMouseLeave={() => handleVideoHover(false)}
+          >
+            {/* Video element (hidden when not hovering) */}
+            <video
+              ref={videoRef}
+              src={item.image_url}
+              className={`w-full h-full object-cover transition-opacity duration-300 ${isHovering ? 'opacity-100' : 'opacity-0'}`}
+              muted
+              playsInline
+              loop
+              onError={(e) => {
+                console.error('Video error:', e);
+              }}
+            />
+            
+            {/* Thumbnail overlay */}
+             <div className={`absolute inset-0 transition-opacity duration-300 ${isHovering ? 'opacity-0' : 'opacity-100'}`}>
+               {videoThumbnail ? (
+                 <img 
+                   src={videoThumbnail} 
+                   alt={item.title}
+                   className="w-full h-full object-cover"
+                 />
+               ) : (
+                 <div className="w-full h-full bg-black flex items-center justify-center">
+                   {/* Black screen - no loading text */}
+                 </div>
+               )}
+               {/* Play button overlay */}
+               <div className="absolute inset-0 flex items-center justify-center">
+                 <div className="bg-white/90 rounded-full p-4 shadow-lg">
+                   <Play className="w-8 h-8 text-black fill-black" />
+                 </div>
+               </div>
+             </div>
+          </div>
+        );
+      } else {
+        return (
+          <video
+            ref={maximizedVideoRef}
+            src={item.image_url}
+            className="max-w-full max-h-full object-contain"
+            controls={showControls}
+            autoPlay
+            playsInline
+            style={{ maxHeight: '90vh', maxWidth: '90vw' }}
+            onError={(e) => {
+              console.error('Video error:', e);
+            }}
+          />
+        );
+      }
     }
 
     return null;
@@ -110,12 +185,18 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const displayImageUrl = isYouTube && youtubeThumbnail ? youtubeThumbnail : item.image_url;
 
   const handleItemClick = (e: React.MouseEvent) => {
-    // Don't navigate if clicking the maximize button
-    if ((e.target as HTMLElement).closest('button')) {
+    e.stopPropagation();
+    
+    // If it's a video and we're hovering, maximize instead of navigating
+    if (isVideo && isHovering) {
+      handleMaximize();
       return;
     }
     
-    if (item.website_url) {
+    // For other cases, either maximize or navigate
+    if (shouldShowMedia || !item.website_url) {
+      handleMaximize();
+    } else if (item.website_url) {
       window.open(item.website_url, '_blank', 'noopener,noreferrer');
     }
   };
@@ -124,20 +205,9 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     <>
       <div
         ref={containerRef}
-        className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid ${item.website_url ? 'cursor-pointer' : ''} ${isYouTube ? 'bg-gradient-to-br from-red-900/20 to-black/40 border border-red-500/20' : ''}`}
+        className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid cursor-pointer ${isYouTube ? 'bg-gradient-to-br from-red-900/20 to-black/40 border border-red-500/20' : ''}`}
         onClick={handleItemClick}
       >
-        {/* Maximize button - hidden for YouTube videos */}
-        {!isYouTube && (
-          <Button
-            onClick={handleMaximize}
-            variant="secondary"
-            size="sm"
-            className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-black/50 hover:bg-black/70 text-white border-none"
-          >
-            <Maximize className="w-4 h-4" />
-          </Button>
-        )}
 
         {shouldShowMedia ? (
           <div className="w-full h-full">
@@ -177,10 +247,17 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
 
       {/* Maximized view modal */}
       {isMaximized && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-          <div className="relative w-full h-full max-w-[95vw] max-h-[95vh] flex flex-col">
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={handleCloseMaximized}
+        >
+          <div 
+            ref={modalRef}
+            className="relative max-w-[95vw] max-h-[95vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Button
-              onClick={handleCloseMaximized}
+              onClick={() => setIsMaximized(false)}
               variant="secondary"
               size="sm"
               className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white border-none"
@@ -188,19 +265,20 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
               <X className="w-4 h-4" />
             </Button>
             
-            {shouldShowMedia ? (
-              <div className="flex-1 w-full h-full min-h-0">
-                {renderMediaContent(true, true)}
-              </div>
-            ) : (
-              <div className="flex-1 flex items-center justify-center min-h-0">
+            <div className="flex items-center justify-center">
+              {shouldShowMedia ? (
+                <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
+                  {renderMediaContent(true, true)}
+                </div>
+              ) : (
                 <img
                   src={displayImageUrl}
                   alt={item.title}
-                  className="max-w-full max-h-full object-contain"
+                  className="max-w-[90vw] max-h-[90vh] object-contain"
+                  onClick={(e) => e.stopPropagation()}
                 />
-              </div>
-            )}
+              )}
+            </div>
             
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 sm:p-6 max-h-[30vh] overflow-y-auto">
               <div className="flex items-center gap-2 mb-2 flex-wrap">

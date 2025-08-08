@@ -22,6 +22,7 @@ interface PortfolioItem {
   category: string;
   image_url: string;
   video_url?: string;
+  thumbnail_url?: string;
   website_url?: string;
   caption: string;
   aspect_ratio: AspectRatioType;
@@ -40,6 +41,8 @@ export const PortfolioManager = () => {
     title: '',
     category: '',
     image_url: '',
+    video_url: '',
+    thumbnail_url: '',
     website_url: '',
     caption: '',
     aspect_ratio: 'square' as AspectRatioType,
@@ -191,6 +194,8 @@ export const PortfolioManager = () => {
       title: '',
       category: categories?.[0] || '',
       image_url: '',
+      video_url: '',
+      thumbnail_url: '',
       website_url: '',
       caption: '',
       aspect_ratio: 'square',
@@ -246,6 +251,8 @@ export const PortfolioManager = () => {
       title: item.title,
       category: item.category,
       image_url: item.image_url,
+      video_url: item.video_url || '',
+      thumbnail_url: item.thumbnail_url || '',
       website_url: item.website_url || '',
       caption: item.caption,
       aspect_ratio: item.aspect_ratio,
@@ -300,7 +307,7 @@ export const PortfolioManager = () => {
               Add Portfolio Item
             </Button>
           </DialogTrigger>
-          <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl">
+          <DialogContent className="bg-gray-900 border-gray-700 text-white max-w-2xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{editingItem ? 'Edit' : 'Add'} Portfolio Item</DialogTitle>
             </DialogHeader>
@@ -382,6 +389,77 @@ export const PortfolioManager = () => {
                   </div>
                 )}
               </div>
+
+              {/* Show thumbnail options only for MP4 videos */}
+              {getMediaType(formData.image_url) === 'video' && (
+                <div className="space-y-4">
+                  <label className="text-sm font-medium text-gray-300">Custom Thumbnail (Required for MP4)</label>
+                  
+                  {/* File Upload Option */}
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400">Upload Thumbnail Image</label>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="bg-gray-800 border-gray-600 hover:bg-gray-700"
+                        onClick={() => document.getElementById('thumbnail-file-input')?.click()}
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Upload Image
+                      </Button>
+                      <input
+                        id="thumbnail-file-input"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            try {
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `${Math.random()}.${fileExt}`;
+                              const filePath = `thumbnails/${fileName}`;
+                              
+                              const { error: uploadError } = await supabase.storage
+                                .from('portfolio-files')
+                                .upload(filePath, file);
+                              
+                              if (uploadError) throw uploadError;
+                              
+                              const { data } = supabase.storage
+                                .from('portfolio-files')
+                                .getPublicUrl(filePath);
+                              
+                              setFormData({ ...formData, thumbnail_url: data.publicUrl });
+                              toast({ title: "Thumbnail uploaded successfully!" });
+                            } catch (error) {
+                              console.error('Upload error:', error);
+                              toast({ title: "Upload failed", description: "Please try again.", variant: "destructive" });
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* URL Input Option */}
+                  <div className="space-y-2">
+                    <label className="text-xs text-gray-400">Or Enter Thumbnail URL</label>
+                    <Input
+                      placeholder="Thumbnail image URL - e.g., https://example.com/thumbnail.jpg"
+                      value={formData.thumbnail_url}
+                      onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
+                      className="bg-gray-800 border-gray-600"
+                    />
+                  </div>
+                  
+                  <p className="text-xs text-gray-500">
+                    Custom thumbnail is required for MP4 videos. If not provided, a black screen with play button will be shown.
+                  </p>
+                </div>
+              )}
 
               <Input
                 placeholder="Website URL (optional) - e.g., https://example.com"
