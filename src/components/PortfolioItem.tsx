@@ -152,9 +152,9 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
                  </div>
                )}
                {/* Play button overlay */}
-               <div className="absolute inset-0 flex items-center justify-center">
-                 <div className="bg-white/30 rounded-full p-4 shadow-lg">
-                   <Play className="w-8 h-8 text-black fill-black" />
+               <div className="absolute bottom-4 left-4">
+                 <div className="bg-white/40 rounded-full p-2.5 shadow-lg">
+                   <Play className="w-6 h-6 text-black fill-black" />
                  </div>
                </div>
              </div>
