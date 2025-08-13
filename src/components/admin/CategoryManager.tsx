@@ -7,7 +7,26 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, GripVertical } from 'lucide-react';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 interface PortfolioCategory {
   id: string;
@@ -15,6 +34,114 @@ interface PortfolioCategory {
   display_order: number;
   is_active: boolean;
 }
+
+interface SortableItemProps {
+  category: PortfolioCategory;
+  editingCategory: string | null;
+  editName: string;
+  onEdit: (category: PortfolioCategory) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+  onToggleActive: (id: string, isActive: boolean) => void;
+  onDelete: (id: string) => void;
+  setEditName: (name: string) => void;
+}
+
+const SortableItem = ({ 
+  category, 
+  editingCategory, 
+  editName, 
+  onEdit, 
+  onSaveEdit, 
+  onCancelEdit, 
+  onToggleActive, 
+  onDelete, 
+  setEditName 
+}: SortableItemProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Card ref={setNodeRef} style={style} className="bg-gray-900 border-gray-700">
+      <CardContent className="pt-4">
+        {editingCategory === category.id ? (
+          <div className="space-y-2">
+            <Input
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              className="bg-gray-800 border-gray-600 text-white"
+              onKeyPress={(e) => e.key === 'Enter' && onSaveEdit()}
+            />
+            <div className="flex gap-1">
+              <Button onClick={onSaveEdit} size="sm" className="bg-green-500 hover:bg-green-600">
+                <Save className="w-3 h-3" />
+              </Button>
+              <Button onClick={onCancelEdit} size="sm" variant="outline">
+                <X className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+               <div className="flex items-center gap-2">
+                 <div 
+                   {...attributes} 
+                   {...listeners} 
+                   className="cursor-grab active:cursor-grabbing p-1 hover:bg-gray-700 rounded"
+                 >
+                   <GripVertical className="w-4 h-4 text-gray-400" />
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <span className="text-xs text-gray-500 bg-gray-800 px-2 py-1 rounded">
+                     #{category.display_order}
+                   </span>
+                   <h4 className="font-semibold text-white">{category.name}</h4>
+                 </div>
+               </div>
+               <Badge className={category.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
+                 {category.is_active ? 'Active' : 'Inactive'}
+               </Badge>
+             </div>
+            <div className="flex gap-1">
+              <Button onClick={() => onEdit(category)} size="sm" variant="outline">
+                <Edit className="w-3 h-3" />
+              </Button>
+              <Button 
+                onClick={() => onToggleActive(category.id, !category.is_active)}
+                size="sm" 
+                variant="outline"
+                className={category.is_active ? 'text-red-400' : 'text-green-400'}
+              >
+                {category.is_active ? 'Deactivate' : 'Activate'}
+              </Button>
+              <Button 
+                onClick={() => onDelete(category.id)} 
+                size="sm" 
+                variant="outline"
+                className="text-red-400"
+              >
+                <Trash2 className="w-3 h-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
 
 export const CategoryManager = () => {
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
@@ -24,6 +151,13 @@ export const CategoryManager = () => {
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ['admin-portfolio-categories'],
@@ -117,6 +251,31 @@ export const CategoryManager = () => {
     }
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: async (reorderedCategories: PortfolioCategory[]) => {
+      const updates = reorderedCategories.map((category, index) => ({
+        id: category.id,
+        display_order: index + 1
+      }));
+
+      for (const update of updates) {
+        const { error } = await supabase
+          .from('portfolio_categories')
+          .update({ display_order: update.display_order })
+          .eq('id', update.id);
+        
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-portfolio-categories'] });
+      toast({ title: "Categories reordered successfully" });
+    },
+    onError: (error) => {
+      toast({ title: "Error reordering categories", description: error.message, variant: "destructive" });
+    }
+  });
+
   const handleEdit = (category: PortfolioCategory) => {
     setEditingCategory(category.id);
     setEditName(category.name);
@@ -139,6 +298,18 @@ export const CategoryManager = () => {
     }
   };
 
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (active.id !== over?.id && categories) {
+      const oldIndex = categories.findIndex((category) => category.id === active.id);
+      const newIndex = categories.findIndex((category) => category.id === over?.id);
+
+      const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+      reorderMutation.mutate(reorderedCategories);
+    }
+  };
+
   if (isLoading) {
     return <div className="text-white">Loading...</div>;
   }
@@ -146,7 +317,10 @@ export const CategoryManager = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-xl font-bold text-white">Portfolio Categories</h3>
+        <div>
+          <h3 className="text-xl font-bold text-white">Portfolio Categories</h3>
+          <p className="text-sm text-gray-400 mt-1">Drag and drop categories to reorder them</p>
+        </div>
         <Button 
           onClick={() => setIsAdding(true)} 
           className="bg-blue-500 hover:bg-blue-600"
@@ -179,62 +353,33 @@ export const CategoryManager = () => {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {categories?.map((category) => (
-          <Card key={category.id} className="bg-gray-900 border-gray-700">
-            <CardContent className="pt-4">
-              {editingCategory === category.id ? (
-                <div className="space-y-2">
-                  <Input
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    className="bg-gray-800 border-gray-600 text-white"
-                    onKeyPress={(e) => e.key === 'Enter' && handleSaveEdit()}
-                  />
-                  <div className="flex gap-1">
-                    <Button onClick={handleSaveEdit} size="sm" className="bg-green-500 hover:bg-green-600">
-                      <Save className="w-3 h-3" />
-                    </Button>
-                    <Button onClick={handleCancelEdit} size="sm" variant="outline">
-                      <X className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-semibold text-white">{category.name}</h4>
-                    <Badge className={category.is_active ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}>
-                      {category.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button onClick={() => handleEdit(category)} size="sm" variant="outline">
-                      <Edit className="w-3 h-3" />
-                    </Button>
-                    <Button 
-                      onClick={() => toggleActiveMutation.mutate({ id: category.id, is_active: !category.is_active })}
-                      size="sm" 
-                      variant="outline"
-                      className={category.is_active ? 'text-red-400' : 'text-green-400'}
-                    >
-                      {category.is_active ? 'Deactivate' : 'Activate'}
-                    </Button>
-                    <Button 
-                      onClick={() => deleteMutation.mutate(category.id)} 
-                      size="sm" 
-                      variant="outline"
-                      className="text-red-400"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <DndContext 
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext 
+          items={categories?.map(cat => cat.id) || []} 
+          strategy={verticalListSortingStrategy}
+        >
+          <div className="space-y-4">
+            {categories?.map((category) => (
+              <SortableItem
+                key={category.id}
+                category={category}
+                editingCategory={editingCategory}
+                editName={editName}
+                onEdit={handleEdit}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={handleCancelEdit}
+                onToggleActive={(id, isActive) => toggleActiveMutation.mutate({ id, is_active: isActive })}
+                onDelete={(id) => deleteMutation.mutate(id)}
+                setEditName={setEditName}
+              />
+            ))}
+          </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 };
