@@ -75,7 +75,7 @@ export const Navigation = () => {
 
   const navItems = [
     { id: 'team', label: 'Team' },
-    { id: 'pricing', label: 'Pricing' },
+    { id: 'team', label: 'Pricing', key: 'pricing-nav' },
     { id: 'contact', label: 'Contact' }
   ];
 
@@ -117,7 +117,7 @@ export const Navigation = () => {
 
             {navItems.map((item) => (
               <button
-                key={item.id}
+                key={item.key || item.id}
                 onClick={() => scrollToSection(item.id)}
                 className="text-gray-300 hover:text-white transition-colors font-medium"
               >
@@ -163,7 +163,7 @@ export const Navigation = () => {
               
               {navItems.map((item) => (
                 <button
-                  key={item.id}
+                  key={item.key || item.id}
                   onClick={() => scrollToSection(item.id)}
                   className="block w-full text-left px-4 py-2 text-gray-300 hover:text-white hover:bg-gray-800 transition-colors"
                 >

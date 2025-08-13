@@ -390,8 +390,8 @@ export const PortfolioManager = () => {
                 )}
               </div>
 
-              {/* Show thumbnail options only for MP4 videos */}
-              {getMediaType(formData.image_url) === 'video' && (
+              {/* Show thumbnail options for MP4 videos and uploaded video files */}
+              {(getMediaType(formData.image_url) === 'video' || (useFileUpload && selectedFile && selectedFile.type.startsWith('video/'))) && !isYouTubeUrl(formData.image_url) && (
                 <div className="space-y-4">
                   <label className="text-sm font-medium text-gray-300">Custom Thumbnail (Required for MP4)</label>
                   
