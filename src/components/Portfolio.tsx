@@ -1,12 +1,16 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { PortfolioItem } from "./PortfolioItem";
 
 export const Portfolio = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [visibleItems, setVisibleItems] = useState<any[]>([]);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+  const ITEMS_PER_PAGE = 12;
 
   // Fetch dynamic categories
   const { data: categories } = useQuery({
@@ -23,21 +27,77 @@ export const Portfolio = () => {
     }
   });
 
-  // Fetch portfolio items with featured items prioritized and proper sorting
-  const { data: portfolioItems, isLoading } = useQuery({
-    queryKey: ['portfolio-items'],
-    queryFn: async () => {
-      const { data, error } = await supabase
+  // Fetch portfolio items with infinite loading
+  const {
+    data: portfolioData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    refetch
+  } = useInfiniteQuery({
+    queryKey: ['portfolio-items', selectedCategory],
+    queryFn: async ({ pageParam = 0 }) => {
+      let query = supabase
         .from('portfolio_items')
         .select('*')
         .order('is_featured', { ascending: false })
         .order('display_order', { ascending: true })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(pageParam * ITEMS_PER_PAGE, (pageParam + 1) * ITEMS_PER_PAGE - 1);
+      
+      if (selectedCategory !== 'All') {
+        query = query.eq('category', selectedCategory);
+      }
+      
+      const { data, error } = await query;
       
       if (error) throw error;
-      return data;
-    }
+      return {
+        items: data || [],
+        nextPage: data && data.length === ITEMS_PER_PAGE ? pageParam + 1 : undefined
+      };
+    },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+    initialPageParam: 0
   });
+
+  // Flatten all pages into a single array
+  const portfolioItems = portfolioData?.pages.flatMap(page => page.items) || [];
+
+  // Setup intersection observer for infinite scroll
+  const setupIntersectionObserver = useCallback(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '100px'
+      }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  // Setup observer when component mounts or dependencies change
+  useEffect(() => {
+    setupIntersectionObserver();
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [setupIntersectionObserver]);
 
   // Listen for custom filter events from navigation
   useEffect(() => {
@@ -52,12 +112,13 @@ export const Portfolio = () => {
     };
   }, []);
 
+  // Reset and refetch when category changes
+  useEffect(() => {
+    refetch();
+  }, [selectedCategory, refetch]);
+
   // Create filter options with All + dynamic categories
   const filterOptions = ['All', ...(categories || [])];
-
-  const filteredItems = portfolioItems?.filter(item => 
-    selectedCategory === 'All' || item.category === selectedCategory
-  );
 
   if (isLoading) {
     return (
@@ -94,12 +155,19 @@ export const Portfolio = () => {
 
         {/* Portfolio grid - 4 columns on desktop, 2 on mobile */}
         <div className="columns-2 md:columns-4 gap-6 space-y-6">
-          {filteredItems?.map((item) => (
+          {portfolioItems?.map((item) => (
             <PortfolioItem key={item.id} item={item} />
           ))}
         </div>
 
-        {filteredItems?.length === 0 && (
+        {/* Loading indicator for infinite scroll */}
+        <div ref={loadMoreRef} className="flex justify-center py-8">
+          {isFetchingNextPage && (
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+          )}
+        </div>
+
+        {portfolioItems?.length === 0 && !isLoading && (
           <div className="text-center py-12">
             <p className="text-gray-400 text-lg">No items found in this category.</p>
           </div>

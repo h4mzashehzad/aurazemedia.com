@@ -23,16 +23,42 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const [textSize, setTextSize] = useState('text-xl');
   const [isHovering, setIsHovering] = useState(false);
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maximizedVideoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
 
   const mediaType = getMediaType(item.image_url);
   const isYouTube = mediaType === 'youtube';
   const isVideo = mediaType === 'video';
   const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(item.image_url) : null;
   const youtubeThumbnail = isYouTube ? getYouTubeThumbnail(item.image_url) : null;
+
+  // Setup intersection observer for lazy loading
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '50px'
+      }
+    );
+
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   // Set thumbnail - only use custom thumbnail_url for MP4 videos
   useEffect(() => {
@@ -105,14 +131,24 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     if (isYouTube && youtubeEmbedUrl) {
       return (
         <div className="relative w-full h-full">
-          <iframe
-            src={`${youtubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}`}
-            className={`w-full h-full rounded-lg ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-105' : ''}`}
-            frameBorder="0"
-            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            title={item.title}
-          />
+          {/* YouTube thumbnail placeholder */}
+          {!isMaximizedView && !isVisible && (
+            <div className="w-full h-full bg-gray-800 animate-pulse flex items-center justify-center rounded-lg">
+              <div className="w-8 h-8 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
+            </div>
+          )}
+          
+          {/* YouTube iframe - only load when visible or maximized */}
+          {(isVisible || isMaximizedView) && (
+            <iframe
+              src={`${youtubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}`}
+              className={`w-full h-full rounded-lg ${!isMaximizedView ? 'transition-transform duration-500 group-hover:scale-105' : ''}`}
+              frameBorder="0"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              title={item.title}
+            />
+          )}
         </div>
       );
     }
@@ -141,11 +177,27 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
             {/* Thumbnail overlay */}
              <div className={`absolute inset-0 transition-opacity duration-300 ${isHovering ? 'opacity-0' : 'opacity-100'}`}>
                {videoThumbnail ? (
-                 <img 
-                   src={videoThumbnail} 
-                   alt={item.title}
-                   className="w-full h-full object-cover"
-                 />
+                 <div className="w-full h-full relative">
+                   {/* Thumbnail loading placeholder */}
+                   {!imageLoaded && (
+                     <div className="w-full h-full bg-gray-800 animate-pulse flex items-center justify-center">
+                       <div className="w-8 h-8 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
+                     </div>
+                   )}
+                   
+                   {/* Actual thumbnail - only load when visible */}
+                   {isVisible && (
+                     <img 
+                       src={videoThumbnail} 
+                       alt={item.title}
+                       className={`w-full h-full object-cover transition-opacity duration-300 ${
+                         imageLoaded ? 'opacity-100' : 'opacity-0'
+                       }`}
+                       onLoad={() => setImageLoaded(true)}
+                       onError={() => setImageLoaded(true)}
+                     />
+                   )}
+                 </div>
                ) : (
                  <div className="w-full h-full bg-black flex items-center justify-center">
                    {/* Black screen - no loading text */}
@@ -214,11 +266,28 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
             {renderMediaContent(false, false)}
           </div>
         ) : (
-          <img
-            src={displayImageUrl}
-            alt={item.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-          />
+          <div className="w-full h-full relative">
+            {/* Placeholder while loading */}
+            {!imageLoaded && (
+              <div className="w-full h-full bg-gray-800 animate-pulse flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-gray-600 border-t-white rounded-full animate-spin"></div>
+              </div>
+            )}
+            
+            {/* Actual image - only load when visible */}
+            {isVisible && (
+              <img
+                ref={imageRef}
+                src={displayImageUrl}
+                alt={item.title}
+                className={`w-full h-full object-cover group-hover:scale-110 transition-all duration-500 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImageLoaded(true)}
+                onError={() => setImageLoaded(true)} // Show even if error to remove loading state
+              />
+            )}
+          </div>
         )}
         
         {/* Content overlay - positioned to not interfere with video playback */}
