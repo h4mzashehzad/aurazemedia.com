@@ -42,8 +42,8 @@ export const Portfolio = () => {
         .from('portfolio_items')
         .select('*')
         .order('is_featured', { ascending: false })
-        .order('display_order', { ascending: true })
         .order('created_at', { ascending: false })
+        //.order('display_order', { ascending: true })
         .range(pageParam * ITEMS_PER_PAGE, (pageParam + 1) * ITEMS_PER_PAGE - 1);
       
       if (selectedCategory !== 'All') {
