@@ -86,7 +86,9 @@ export type Database = {
           display_order: number | null
           id: string
           is_active: boolean | null
+          is_password_protected: boolean | null
           name: string
+          password_hash: string | null
           updated_at: string
         }
         Insert: {
@@ -94,7 +96,9 @@ export type Database = {
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          is_password_protected?: boolean | null
           name: string
+          password_hash?: string | null
           updated_at?: string
         }
         Update: {
@@ -102,7 +106,9 @@ export type Database = {
           display_order?: number | null
           id?: string
           is_active?: boolean | null
+          is_password_protected?: boolean | null
           name?: string
+          password_hash?: string | null
           updated_at?: string
         }
         Relationships: []
