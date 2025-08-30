@@ -22,6 +22,7 @@ export type Database = {
           id: string
           is_active: boolean
           password_hash: string
+          role: Database["public"]["Enums"]["admin_role"] | null
           updated_at: string
         }
         Insert: {
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           password_hash: string
+          role?: Database["public"]["Enums"]["admin_role"] | null
           updated_at?: string
         }
         Update: {
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           password_hash?: string
+          role?: Database["public"]["Enums"]["admin_role"] | null
           updated_at?: string
         }
         Relationships: []
@@ -302,10 +305,12 @@ export type Database = {
           admin_id: string
           full_name: string
           email: string
+          role: Database["public"]["Enums"]["admin_role"]
         }[]
       }
     }
     Enums: {
+      admin_role: "super_admin" | "portfolio_admin"
       aspect_ratio: "square" | "wide" | "tall"
     }
     CompositeTypes: {
@@ -434,6 +439,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      admin_role: ["super_admin", "portfolio_admin"],
       aspect_ratio: ["square", "wide", "tall"],
     },
   },

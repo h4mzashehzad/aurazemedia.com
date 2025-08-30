@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
 interface AdminLoginProps {
-  onLogin: (admin: { id: string; full_name: string; email: string }) => void;
+  onLogin: (admin: { id: string; full_name: string; email: string; role: string }) => void;
 }
 
 export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
@@ -38,7 +38,8 @@ export const AdminLogin = ({ onLogin }: AdminLoginProps) => {
         const admin = {
           id: adminData.admin_id,
           full_name: adminData.full_name,
-          email: adminData.email
+          email: adminData.email,
+          role: adminData.role
         };
         localStorage.setItem('admin_user', JSON.stringify(admin));
         onLogin(admin);

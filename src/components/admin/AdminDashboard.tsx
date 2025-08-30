@@ -12,7 +12,7 @@ import { SettingsManager } from './SettingsManager';
 import { CategoryManager } from './CategoryManager';
 
 interface AdminDashboardProps {
-  admin: { id: string; full_name: string; email: string };
+  admin: { id: string; full_name: string; email: string; role: string };
   onLogout: () => void;
 }
 
@@ -22,6 +22,31 @@ export const AdminDashboard = ({ admin, onLogout }: AdminDashboardProps) => {
   const handleLogout = () => {
     localStorage.removeItem('admin_user');
     onLogout();
+  };
+
+  // Define which tabs are accessible for each role
+  const getAccessibleTabs = () => {
+    if (admin.role === 'portfolio_admin') {
+      return ['portfolio'];
+    }
+    // super_admin has access to all tabs
+    return ['portfolio', 'categories', 'team', 'pricing', 'contact', 'settings'];
+  };
+
+  const accessibleTabs = getAccessibleTabs();
+  
+  // Get appropriate grid class based on tab count
+  const getGridClass = () => {
+    const tabCount = accessibleTabs.length;
+    switch (tabCount) {
+      case 1: return 'grid-cols-1';
+      case 2: return 'grid-cols-2';
+      case 3: return 'grid-cols-3';
+      case 4: return 'grid-cols-4';
+      case 5: return 'grid-cols-5';
+      case 6: return 'grid-cols-6';
+      default: return 'grid-cols-6';
+    }
   };
 
   return (
@@ -47,56 +72,80 @@ export const AdminDashboard = ({ admin, onLogout }: AdminDashboardProps) => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-900">
-            <TabsTrigger value="portfolio" className="flex items-center gap-2">
-              <Image className="w-4 h-4" />
-              Portfolio
-            </TabsTrigger>
-            <TabsTrigger value="categories" className="flex items-center gap-2">
-              <FolderOpen className="w-4 h-4" />
-              Categories
-            </TabsTrigger>
-            <TabsTrigger value="team" className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              Team
-            </TabsTrigger>
-            <TabsTrigger value="pricing" className="flex items-center gap-2">
-              <Package className="w-4 h-4" />
-              Pricing
-            </TabsTrigger>
-            <TabsTrigger value="contact" className="flex items-center gap-2">
-              <MessageSquare className="w-4 h-4" />
-              Contact
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="w-4 h-4" />
-              Settings
-            </TabsTrigger>
+          <TabsList className={`grid w-full ${getGridClass()} bg-gray-900`}>
+            {accessibleTabs.includes('portfolio') && (
+              <TabsTrigger value="portfolio" className="flex items-center gap-2">
+                <Image className="w-4 h-4" />
+                Portfolio
+              </TabsTrigger>
+            )}
+            {accessibleTabs.includes('categories') && (
+              <TabsTrigger value="categories" className="flex items-center gap-2">
+                <FolderOpen className="w-4 h-4" />
+                Categories
+              </TabsTrigger>
+            )}
+            {accessibleTabs.includes('team') && (
+              <TabsTrigger value="team" className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                Team
+              </TabsTrigger>
+            )}
+            {accessibleTabs.includes('pricing') && (
+              <TabsTrigger value="pricing" className="flex items-center gap-2">
+                <Package className="w-4 h-4" />
+                Pricing
+              </TabsTrigger>
+            )}
+            {accessibleTabs.includes('contact') && (
+              <TabsTrigger value="contact" className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4" />
+                Contact
+              </TabsTrigger>
+            )}
+            {accessibleTabs.includes('settings') && (
+              <TabsTrigger value="settings" className="flex items-center gap-2">
+                <Settings className="w-4 h-4" />
+                Settings
+              </TabsTrigger>
+            )}
           </TabsList>
 
-          <TabsContent value="portfolio">
-            <PortfolioManager />
-          </TabsContent>
+          {accessibleTabs.includes('portfolio') && (
+            <TabsContent value="portfolio">
+              <PortfolioManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="categories">
-            <CategoryManager />
-          </TabsContent>
+          {accessibleTabs.includes('categories') && (
+            <TabsContent value="categories">
+              <CategoryManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="team">
-            <TeamManager />
-          </TabsContent>
+          {accessibleTabs.includes('team') && (
+            <TabsContent value="team">
+              <TeamManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="pricing">
-            <PricingManager />
-          </TabsContent>
+          {accessibleTabs.includes('pricing') && (
+            <TabsContent value="pricing">
+              <PricingManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="contact">
-            <ContactManager />
-          </TabsContent>
+          {accessibleTabs.includes('contact') && (
+            <TabsContent value="contact">
+              <ContactManager />
+            </TabsContent>
+          )}
 
-          <TabsContent value="settings">
-            <SettingsManager />
-          </TabsContent>
+          {accessibleTabs.includes('settings') && (
+            <TabsContent value="settings">
+              <SettingsManager />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
