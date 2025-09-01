@@ -75,7 +75,7 @@ export const Navigation = () => {
 
   const navItems = [
     { id: 'team', label: 'Team' },
-    { id: 'team', label: 'Pricing', key: 'pricing-nav' },
+    { id: 'contact', label: 'Pricing', key: 'pricing-nav' },
     { id: 'contact', label: 'Contact' }
   ];
 
@@ -124,12 +124,6 @@ export const Navigation = () => {
                 {item.label}
               </button>
             ))}
-            <Button 
-              onClick={() => scrollToSection('contact')}
-              className="bg-white hover:bg-gray-200 text-black px-6"
-            >
-              Get Started
-            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -170,14 +164,6 @@ export const Navigation = () => {
                   {item.label}
                 </button>
               ))}
-              <div className="px-4 pt-2">
-                <Button 
-                  onClick={() => scrollToSection('contact')}
-                  className="w-full bg-white hover:bg-gray-200 text-black"
-                >
-                  Get Started
-                </Button>
-              </div>
             </div>
           </div>
         )}
