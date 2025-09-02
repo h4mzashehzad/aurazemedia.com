@@ -12,7 +12,9 @@ export const Portfolio = () => {
   const [visibleItems, setVisibleItems] = useState<any[]>([]);
   const [showPasswordDialog, setShowPasswordDialog] = useState(false);
   const [pendingCategory, setPendingCategory] = useState<string>('');
+  const [isPortfolioInView, setIsPortfolioInView] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const portfolioSectionRef = useRef<HTMLElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const ITEMS_PER_PAGE = 12;
 
@@ -89,7 +91,8 @@ export const Portfolio = () => {
     observerRef.current = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        // Only fetch next page if the portfolio section is in view AND the load more trigger is intersecting
+        if (entry.isIntersecting && hasNextPage && !isFetchingNextPage && isPortfolioInView) {
           fetchNextPage();
         }
       },
@@ -102,7 +105,7 @@ export const Portfolio = () => {
     if (loadMoreRef.current) {
       observerRef.current.observe(loadMoreRef.current);
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, isPortfolioInView]);
 
   // Setup observer when component mounts or dependencies change
   useEffect(() => {
@@ -113,6 +116,28 @@ export const Portfolio = () => {
       }
     };
   }, [setupIntersectionObserver]);
+
+  // Setup intersection observer to track if portfolio section is in view
+  useEffect(() => {
+    const portfolioObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        setIsPortfolioInView(entry.isIntersecting);
+      },
+      {
+        threshold: 0.1,
+        rootMargin: '0px'
+      }
+    );
+
+    if (portfolioSectionRef.current) {
+      portfolioObserver.observe(portfolioSectionRef.current);
+    }
+
+    return () => {
+      portfolioObserver.disconnect();
+    };
+  }, []);
 
   // Listen for custom filter events from navigation
   useEffect(() => {
@@ -200,7 +225,7 @@ export const Portfolio = () => {
   }
 
   return (
-    <section id="portfolio" className="py-20 bg-black pt-24">
+    <section ref={portfolioSectionRef} id="portfolio" className="py-20 bg-black pt-24">
       <div className="container mx-auto px-4">
         {/* Category filters */}
         <div className="flex flex-wrap justify-center gap-4 mb-12">
@@ -226,10 +251,12 @@ export const Portfolio = () => {
           })}
         </div>
 
-        {/* Portfolio grid - 4 columns on desktop, 2 on mobile */}
-        <div className="columns-2 md:columns-4 gap-6 space-y-6">
+        {/* Portfolio grid - 4 columns on desktop, 2 on mobile - Instagram style 1:1 aspect ratio */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           {portfolioItems?.map((item) => (
-            <PortfolioItem key={item.id} item={item} />
+            <div key={item.id} className="aspect-square">
+              <PortfolioItem item={item} />
+            </div>
           ))}
         </div>
 

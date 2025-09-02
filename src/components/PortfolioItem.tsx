@@ -77,7 +77,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     const updateTextSize = () => {
       if (containerRef.current) {
         const { height } = containerRef.current.getBoundingClientRect();
-        
+
         if (height < 200) {
           setTextSize('text-xs');
         } else if (height < 300) {
@@ -91,7 +91,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     };
 
     updateTextSize();
-    
+
     const resizeObserver = new ResizeObserver(updateTextSize);
     if (containerRef.current) {
       resizeObserver.observe(containerRef.current);
@@ -257,7 +257,7 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
     <>
       <div
         ref={containerRef}
-        className={`group relative overflow-hidden rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 break-inside-avoid cursor-pointer ${isYouTube ? 'bg-gradient-to-br from-red-900/20 to-black/40 border border-red-500/20' : ''}`}
+        className={`group relative overflow-hidden rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer w-full h-full ${isYouTube ? 'bg-gradient-to-br from-red-900/20 to-black/40 border border-red-500/20' : ''}`}
         onClick={handleItemClick}
       >
 
