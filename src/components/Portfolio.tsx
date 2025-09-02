@@ -227,7 +227,7 @@ export const Portfolio = () => {
         </div>
 
         {/* Portfolio grid - 4 columns on desktop, 2 on mobile - Instagram style 1:1 aspect ratio */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {portfolioItems?.map((item) => (
             <div key={item.id} className="aspect-square">
               <PortfolioItem item={item} />
