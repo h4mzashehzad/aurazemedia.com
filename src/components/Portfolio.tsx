@@ -228,9 +228,14 @@ export const Portfolio = () => {
 
         {/* Portfolio grid - 4 columns on desktop, 2 on mobile - Instagram style 1:1 aspect ratio */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {portfolioItems?.map((item) => (
+          {portfolioItems?.map((item, index) => (
             <div key={item.id} className="aspect-square">
-              <PortfolioItem item={item} />
+              <PortfolioItem 
+                item={item} 
+                currentIndex={index}
+                totalItems={portfolioItems.length}
+                portfolioItems={portfolioItems}
+              />
             </div>
           ))}
         </div>

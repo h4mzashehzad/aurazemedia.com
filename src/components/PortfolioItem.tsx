@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Play, X } from "lucide-react";
+import { Play, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { getMediaType, getYouTubeEmbedUrl, getYouTubeThumbnail, isVideoFile } from "@/lib/youtube";
 
 interface PortfolioItemProps {
@@ -16,10 +16,14 @@ interface PortfolioItemProps {
     website_url?: string;
     is_featured: boolean;
   };
+  currentIndex?: number;
+  totalItems?: number;
+  portfolioItems?: any[];
 }
 
-export const PortfolioItem = ({ item }: PortfolioItemProps) => {
+export const PortfolioItem = ({ item, currentIndex, totalItems, portfolioItems }: PortfolioItemProps) => {
   const [isMaximized, setIsMaximized] = useState(false);
+  const [currentItem, setCurrentItem] = useState(item);
   const [textSize, setTextSize] = useState('text-xl');
   const [isHovering, setIsHovering] = useState(false);
   const [videoThumbnail, setVideoThumbnail] = useState<string | null>(null);
@@ -36,6 +40,13 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   const isVideo = mediaType === 'video';
   const youtubeEmbedUrl = isYouTube ? getYouTubeEmbedUrl(item.image_url) : null;
   const youtubeThumbnail = isYouTube ? getYouTubeThumbnail(item.image_url) : null;
+
+  // Media type for current item in maximized view
+  const currentMediaType = getMediaType(currentItem.image_url);
+  const currentIsYouTube = currentMediaType === 'youtube';
+  const currentIsVideo = currentMediaType === 'video';
+  const currentYoutubeEmbedUrl = currentIsYouTube ? getYouTubeEmbedUrl(currentItem.image_url) : null;
+  const currentYoutubeThumbnail = currentIsYouTube ? getYouTubeThumbnail(currentItem.image_url) : null;
 
   // Setup intersection observer for lazy loading
   useEffect(() => {
@@ -59,6 +70,27 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
 
     return () => observer.disconnect();
   }, []);
+
+  // Keyboard navigation for maximized view
+  useEffect(() => {
+    if (!isMaximized) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handleNavigateToPrevious();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        handleNavigateToNext();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsMaximized(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isMaximized]);
 
   // Set thumbnail - only use custom thumbnail_url for MP4 videos
   useEffect(() => {
@@ -101,7 +133,28 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
   }, []);
 
   const handleMaximize = () => {
+    setCurrentItem(item); // Reset to original item when opening
     setIsMaximized(true);
+  };
+
+  const handleNavigateToNext = () => {
+    if (portfolioItems && portfolioItems.length > 0) {
+      const currentItemIndex = portfolioItems.findIndex(pItem => pItem.id === currentItem.id);
+      if (currentItemIndex !== -1) {
+        const nextIndex = (currentItemIndex + 1) % portfolioItems.length;
+        setCurrentItem(portfolioItems[nextIndex]);
+      }
+    }
+  };
+
+  const handleNavigateToPrevious = () => {
+    if (portfolioItems && portfolioItems.length > 0) {
+      const currentItemIndex = portfolioItems.findIndex(pItem => pItem.id === currentItem.id);
+      if (currentItemIndex !== -1) {
+        const prevIndex = (currentItemIndex - 1 + portfolioItems.length) % portfolioItems.length;
+        setCurrentItem(portfolioItems[prevIndex]);
+      }
+    }
   };
 
   const handleCloseMaximized = (e: React.MouseEvent) => {
@@ -333,16 +386,62 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
             >
               <X className="w-4 h-4" />
             </Button>
+
+            {/* Navigation arrows */}
+            {totalItems && totalItems > 1 && (
+              <>
+                {/* Previous button */}
+                <Button
+                  onClick={handleNavigateToPrevious}
+                  variant="secondary"
+                  size="lg"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/70 hover:bg-black/90 text-white border-2 border-white/20 hover:border-white/40 rounded-full w-14 h-14 p-0 transition-all duration-200 shadow-lg backdrop-blur-sm"
+                >
+                  <ChevronLeft className="w-7 h-7" />
+                </Button>
+                
+                {/* Next button */}
+                <Button
+                  onClick={handleNavigateToNext}
+                  variant="secondary"
+                  size="lg"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-black/70 hover:bg-black/90 text-white border-2 border-white/20 hover:border-white/40 rounded-full w-14 h-14 p-0 transition-all duration-200 shadow-lg backdrop-blur-sm"
+                >
+                  <ChevronRight className="w-7 h-7" />
+                </Button>
+              </>
+            )}
             
             <div className="flex items-center justify-center">
-              {shouldShowMedia ? (
+              {(currentIsYouTube || currentIsVideo) ? (
                 <div className="flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                  {renderMediaContent(true, true)}
+                  {currentIsYouTube && currentYoutubeEmbedUrl ? (
+                    <iframe
+                      src={`${currentYoutubeEmbedUrl.replace('autoplay=1', 'autoplay=0')}`}
+                      className="max-w-[90vw] max-h-[90vh]"
+                      style={{ aspectRatio: '16/9', width: 'min(90vw, 90vh * 16/9)', height: 'min(90vh, 90vw * 9/16)' }}
+                      frameBorder="0"
+                      allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      title={currentItem.title}
+                    />
+                  ) : currentIsVideo ? (
+                    <video
+                      src={currentItem.image_url}
+                      className="max-w-[90vw] max-h-[90vh] object-contain"
+                      controls
+                      autoPlay
+                      playsInline
+                      onError={(e) => {
+                        console.error('Video error:', e);
+                      }}
+                    />
+                  ) : null}
                 </div>
               ) : (
                 <img
-                  src={displayImageUrl}
-                  alt={item.title}
+                  src={currentItem.image_url}
+                  alt={currentItem.title}
                   className="max-w-[90vw] max-h-[90vh] object-contain"
                   onClick={(e) => e.stopPropagation()}
                 />
@@ -352,19 +451,19 @@ export const PortfolioItem = ({ item }: PortfolioItemProps) => {
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 sm:p-6 max-h-[30vh] overflow-y-auto">
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <Badge variant="secondary" className="bg-white/20 text-white text-xs sm:text-sm">
-                  {item.category}
+                  {currentItem.category}
                 </Badge>
-                {item.is_featured && (
+                {currentItem.is_featured && (
                   <Badge className="bg-white text-black text-xs sm:text-sm">Featured</Badge>
                 )}
-                {item.website_url && (
+                {currentItem.website_url && (
                   <Badge variant="outline" className="bg-blue-500/20 text-blue-300 border-blue-400 text-xs sm:text-sm">
                     Link
                   </Badge>
                 )}
               </div>
-              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 line-clamp-2">{item.title}</h3>
-              <p className="text-gray-200 text-sm sm:text-base line-clamp-3">{item.caption}</p>
+              <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-white mb-2 line-clamp-2">{currentItem.title}</h3>
+              <p className="text-gray-200 text-sm sm:text-base line-clamp-3">{currentItem.caption}</p>
             </div>
           </div>
         </div>
